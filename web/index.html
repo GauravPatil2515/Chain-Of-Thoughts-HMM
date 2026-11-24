@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-[#080808] text-[#E2E8F0]">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoT-HMM | Structural Plausibility Scoring for Chain-of-Thought Reasoning</title>
   
-  <!-- Open Graph / Meta for Social Previews -->
+  <!-- Open Graph / Meta -->
   <meta name="description" content="A lightweight, one-class neuro-symbolic structural guardrail that detects hallucinated reasoning loops and premature conclusions in LLMs in 148ms on CPU. Accepted at IEEE IDCIoT 2027.">
   <meta property="og:title" content="CoT-HMM | Structural Plausibility Scoring for LLM Reasoning">
   <meta property="og:description" content="Evaluate reasoning topology, catch degenerative loops, and save 42-47% inference overhead. IEEE IDCIoT 2027.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://gauravpatil2515.github.io/Chain-Of-Thoughts-HMM/">
 
-  <!-- Fonts: DM Serif Display, Geist Mono, Inter -->
+  <!-- Google Fonts: Newsreader / Playfair Display & JetBrains Mono / Inter for Crisp Rendering -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@1&family=Geist+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Geist+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Lenis Smooth Scroll CSS -->
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.1.20/dist/lenis.css">
@@ -24,15 +24,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            obsidian: '#080808',
-            surface: 'rgba(255, 255, 255, 0.02)',
-            silver: '#E2E8F0',
+            obsidian: '#0a0a0c',
+            surfaceDark: '#121216',
+            surfaceLight: '#ffffff',
           },
           fontFamily: {
-            serif: ['"DM Serif Display"', 'serif'],
+            serif: ['"DM Serif Display"', 'Georgia', 'serif'],
             mono: ['"Geist Mono"', 'monospace'],
             sans: ['"Inter"', 'sans-serif'],
           }
@@ -42,6 +43,13 @@
   </script>
 
   <style>
+    /* Ultra Crisp Text Rendering (Anti-Blur) */
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
     /* Lenis Smooth Scroll Configuration */
     html.lenis, html.lenis body {
       height: auto;
@@ -49,159 +57,131 @@
     .lenis.lenis-smooth {
       scroll-behavior: auto !important;
     }
-    .lenis.lenis-smooth [data-lenis-prevent] {
-      overscroll-behavior: contain;
+
+    /* Crisp Light / Dark Card System */
+    .theme-card {
+      transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
     }
-    .lenis.lenis-stopped {
-      overflow: hidden;
+    
+    .dark .theme-card {
+      background-color: #121216;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
     }
-    .lenis.lenis-scrolling iframe {
-      pointer-events: none;
+    .dark .theme-card:hover {
+      background-color: #17171d;
+      border-color: rgba(255, 255, 255, 0.22);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.7);
     }
 
-    /* Noise Background Overlay */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      pointer-events: none;
-      z-index: 50;
-      opacity: 0.038;
-      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    html:not(.dark) .theme-card {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.06);
+    }
+    html:not(.dark) .theme-card:hover {
+      background-color: #ffffff;
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.12);
     }
 
-    /* Interactive Cursor Spotlight Glow */
-    #cursor-spotlight {
-      position: fixed;
-      width: 550px;
-      height: 550px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0) 70%);
-      border-radius: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      transition: opacity 0.3s ease;
-      z-index: 1;
+    /* Crisp High-Contrast Headlines */
+    .dark .headline-gradient {
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 70%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-
-    /* Ambient Spotlight Radial Glow */
-    .ambient-glow {
-      position: absolute;
-      top: -120px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 800px;
-      height: 480px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* Metallic Silver Gradient Typography */
-    .silver-gradient-text {
-      background: linear-gradient(135deg, #FFFFFF 0%, #A1A1AA 55%, #71717A 100%);
+    html:not(.dark) .headline-gradient {
+      background: linear-gradient(135deg, #0f172a 0%, #334155 70%, #475569 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    /* Frosted Glass with Inner Highlight */
-    .frosted-glass {
-      background: rgba(255, 255, 255, 0.018);
-      backdrop-filter: blur(32px);
-      -webkit-backdrop-filter: blur(32px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+    /* Clean Subtle Grid */
+    .dark .bg-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+    html:not(.dark) .bg-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
     }
 
-    /* Interactive Card with Glow Border */
-    .bento-card {
-      position: relative;
-      background: rgba(255, 255, 255, 0.015);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Primary High-Contrast Buttons */
+    .dark .btn-primary {
+      background-color: #ffffff;
+      color: #09090b;
+      box-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
     }
-    .bento-card:hover {
-      background: rgba(255, 255, 255, 0.038);
-      border-color: rgba(255, 255, 255, 0.22);
-      transform: translateY(-3px);
-      box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
-    }
-
-    /* Premium Silver Button */
-    .silver-btn {
-      background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 50%, #CBD5E1 100%);
-      color: #080808;
-      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
-    }
-    .silver-btn:hover {
-      box-shadow: 0 0 30px rgba(255, 255, 255, 0.35);
-      transform: translateY(-1.5px);
-    }
-
-    /* Secondary Glass Button */
-    .glass-btn {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .glass-btn:hover {
-      background: rgba(255, 255, 255, 0.07);
-      border-color: rgba(255, 255, 255, 0.28);
+    .dark .btn-primary:hover {
+      background-color: #f1f5f9;
+      box-shadow: 0 4px 18px rgba(255, 255, 255, 0.35);
       transform: translateY(-1px);
     }
-
-    /* Subtle grid line accents */
-    .grid-lines {
-      background-size: 48px 48px;
-      background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    html:not(.dark) .btn-primary {
+      background-color: #0f172a;
+      color: #ffffff;
+      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.2);
     }
-
-    /* Floating Header Transition */
-    .sticky-nav {
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    html:not(.dark) .btn-primary:hover {
+      background-color: #1e293b;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.3);
+      transform: translateY(-1px);
     }
   </style>
 </head>
-<body class="relative min-h-screen bg-[#080808] text-[#E2E8F0] selection:bg-white selection:text-black overflow-x-hidden grid-lines">
-
-  <!-- Interactive Mouse Spotlight -->
-  <div id="cursor-spotlight"></div>
-
-  <!-- Ambient Glow Behind Hero -->
-  <div class="ambient-glow"></div>
+<body class="relative min-h-screen bg-[#0a0a0c] text-neutral-200 dark:bg-[#0a0a0c] dark:text-[#E2E8F0] selection:bg-neutral-800 selection:text-white overflow-x-hidden bg-grid transition-colors duration-300">
 
   <!-- ========================================================================= -->
-  <!-- 1. STICKY FLOATING GLASS NAVIGATION BAR -->
+  <!-- 1. STICKY TOP NAVIGATION BAR -->
   <!-- ========================================================================= -->
   <div class="sticky top-4 z-40 w-full flex justify-center px-4">
-    <nav class="sticky-nav w-[92vw] max-w-7xl mx-auto py-3.5 px-6 rounded-2xl frosted-glass flex items-center justify-between shadow-2xl bg-black/60">
+    <nav class="w-[92vw] max-w-7xl mx-auto py-3 px-6 rounded-2xl border transition-all duration-300 flex items-center justify-between shadow-xl bg-white/80 dark:bg-[#121216]/90 backdrop-blur-md border-neutral-200 dark:border-white/[0.08]">
+      
       <!-- Brand Logo -->
       <a href="#" class="flex items-center space-x-3 group">
-        <span class="w-2.5 h-2.5 rounded-full bg-white group-hover:scale-125 transition duration-300"></span>
-        <span class="font-mono text-xs md:text-sm tracking-[0.3em] uppercase text-white font-semibold">
+        <span class="w-2.5 h-2.5 rounded-full bg-neutral-900 dark:bg-white group-hover:scale-125 transition duration-300"></span>
+        <span class="font-mono text-xs md:text-sm tracking-[0.25em] uppercase font-bold text-neutral-900 dark:text-white">
           COT-HMM // RESEARCH
         </span>
       </a>
 
-      <!-- Desktop Navigation Links -->
-      <div class="hidden md:flex items-center space-x-2">
-        <div class="flex items-center rounded-xl bg-white/[0.025] border border-white/[0.08] p-1 space-x-1 text-xs font-mono tracking-wider uppercase">
-          <a href="#demo" class="px-3.5 py-1.5 hover:text-white transition text-neutral-400">Interactive Demo</a>
-          <a href="#architecture" class="px-3.5 py-1.5 hover:text-white transition text-neutral-400">Architecture</a>
-          <a href="#benchmarks" class="px-3.5 py-1.5 hover:text-white transition text-neutral-400">Benchmarks</a>
-          <a href="#reproducibility" class="px-3.5 py-1.5 hover:text-white transition text-neutral-400">Python SDK</a>
+      <!-- Desktop Links & Mode Switcher -->
+      <div class="hidden md:flex items-center space-x-3">
+        <div class="flex items-center rounded-xl p-1 space-x-1 text-xs font-mono tracking-wider uppercase bg-neutral-100 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/[0.08]">
+          <a href="#demo" class="px-3.5 py-1.5 hover:text-black dark:hover:text-white transition text-neutral-600 dark:text-neutral-400 font-medium">Demo</a>
+          <a href="#architecture" class="px-3.5 py-1.5 hover:text-black dark:hover:text-white transition text-neutral-600 dark:text-neutral-400 font-medium">Architecture</a>
+          <a href="#benchmarks" class="px-3.5 py-1.5 hover:text-black dark:hover:text-white transition text-neutral-600 dark:text-neutral-400 font-medium">Benchmarks</a>
+          <a href="#reproducibility" class="px-3.5 py-1.5 hover:text-black dark:hover:text-white transition text-neutral-600 dark:text-neutral-400 font-medium">Python SDK</a>
         </div>
-        <a href="https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM" target="_blank" class="silver-btn px-4 py-1.5 rounded-xl font-mono text-xs font-bold uppercase tracking-[0.15em] flex items-center space-x-2">
+
+        <!-- Theme Toggle Button -->
+        <button onclick="toggleTheme()" id="theme-btn" class="p-2 rounded-xl border border-neutral-200 dark:border-white/[0.1] bg-neutral-100 dark:bg-white/[0.04] text-neutral-800 dark:text-neutral-200 hover:scale-105 transition flex items-center justify-center" title="Toggle Light / Dark Mode">
+          <!-- Sun Icon (visible in dark) -->
+          <svg id="sun-icon" class="w-4 h-4 hidden dark:block text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <!-- Moon Icon (visible in light) -->
+          <svg id="moon-icon" class="w-4 h-4 block dark:hidden text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+
+        <!-- GitHub Star Button -->
+        <a href="https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM" target="_blank" class="btn-primary px-4 py-2 rounded-xl font-mono text-xs font-bold uppercase tracking-[0.15em] flex items-center space-x-2 transition">
           <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
           <span>Star</span>
         </a>
       </div>
 
-      <!-- Mobile Action -->
-      <div class="md:hidden">
-        <a href="#demo" class="silver-btn px-3 py-1.5 rounded-lg font-mono text-[10px] font-bold tracking-widest uppercase">
+      <!-- Mobile Button & Theme Switcher -->
+      <div class="flex items-center space-x-2 md:hidden">
+        <button onclick="toggleTheme()" class="p-2 rounded-lg border border-neutral-200 dark:border-white/10 bg-neutral-100 dark:bg-white/5">
+          <svg class="w-4 h-4 text-neutral-800 dark:text-neutral-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        </button>
+        <a href="#demo" class="btn-primary px-3 py-1.5 rounded-lg font-mono text-[10px] font-bold tracking-widest uppercase">
           Demo
         </a>
       </div>
@@ -211,57 +191,57 @@
   <!-- ========================================================================= -->
   <!-- 2. HERO SECTION -->
   <!-- ========================================================================= -->
-  <header class="w-[92vw] mx-auto mt-6 rounded-[2rem] md:rounded-[4rem] frosted-glass p-8 md:p-20 text-center relative overflow-hidden z-10">
+  <header class="w-[92vw] max-w-7xl mx-auto mt-6 rounded-[2rem] md:rounded-[3.5rem] theme-card p-8 md:p-20 text-center relative overflow-hidden">
     
     <!-- Conference Metadata Pill -->
-    <div class="inline-flex items-center space-x-3 px-4 py-1.5 rounded-full border border-white/[0.12] bg-white/[0.03] font-mono text-[11px] uppercase tracking-[0.25em] text-neutral-300 mb-8">
-      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span>Accepted at IEEE IDCIoT 2027 • Paper ID: IDCIoT-154</span>
+    <div class="inline-flex items-center space-x-3 px-4 py-1.5 rounded-full border border-neutral-300 dark:border-white/[0.12] bg-neutral-100 dark:bg-white/[0.03] font-mono text-[11px] uppercase tracking-[0.25em] text-neutral-700 dark:text-neutral-300 mb-8 shadow-sm">
+      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span class="font-semibold">Accepted at IEEE IDCIoT 2027 • Paper ID: IDCIoT-154</span>
     </div>
 
-    <!-- Main Headline -->
-    <h1 class="font-serif italic tracking-tighter leading-[0.88] text-[clamp(44px,8vw,124px)] text-white max-w-6xl mx-auto my-4">
+    <!-- Main Headline with Crisp Rendering -->
+    <h1 class="font-serif italic tracking-tighter leading-[0.9] text-[clamp(44px,7.8vw,118px)] text-neutral-900 dark:text-white max-w-5xl mx-auto my-3">
       Stop Hallucinating.<br>
-      <span class="silver-gradient-text">Verify Reasoning.</span>
+      <span class="headline-gradient">Verify Reasoning.</span>
     </h1>
 
     <!-- Core Research Pitch -->
-    <p class="font-sans font-light text-neutral-400 text-base md:text-xl max-w-3xl mx-auto mt-6 mb-8 leading-relaxed">
-      A lightweight, one-class neuro-symbolic filter that learns the latent structural grammar of valid problem solving. Detects premature conclusions and circular loops in <strong class="text-white font-medium">148ms on CPU</strong>—saving <strong class="text-white font-medium">42% to 47%</strong> of downstream LLM inference overhead.
+    <p class="font-sans font-normal text-neutral-600 dark:text-neutral-400 text-base md:text-xl max-w-3xl mx-auto mt-6 mb-8 leading-relaxed">
+      A lightweight, one-class neuro-symbolic filter that learns the latent structural grammar of valid problem solving. Detects premature conclusions and circular loops in <strong class="text-neutral-900 dark:text-white font-semibold">148ms on CPU</strong>—saving <strong class="text-neutral-900 dark:text-white font-semibold">42% to 47%</strong> of downstream LLM inference overhead.
     </p>
 
     <!-- 1-Click Copyable Terminal Command -->
-    <div class="inline-flex items-center max-w-xl mx-auto bg-black/70 border border-white/[0.12] rounded-xl px-4 py-2.5 my-4 font-mono text-xs group cursor-pointer hover:border-white/30 transition" onclick="copyPipCommand()">
-      <span class="text-neutral-500 mr-2 select-none">$</span>
-      <span id="pip-text" class="text-neutral-200 select-all tracking-wide">pip install git+https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM.git</span>
-      <button class="ml-4 px-2.5 py-1 rounded bg-white/10 text-[10px] text-white uppercase tracking-widest hover:bg-white/20 transition flex items-center space-x-1">
+    <div class="inline-flex items-center max-w-xl mx-auto bg-neutral-100 dark:bg-black/70 border border-neutral-300 dark:border-white/[0.12] rounded-xl px-4 py-2.5 my-4 font-mono text-xs group cursor-pointer hover:border-neutral-400 dark:hover:border-white/30 transition shadow-sm" onclick="copyPipCommand()">
+      <span class="text-neutral-500 dark:text-neutral-500 mr-2 select-none font-bold">$</span>
+      <span id="pip-text" class="text-neutral-800 dark:text-neutral-200 select-all tracking-wide">pip install git+https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM.git</span>
+      <button class="ml-4 px-2.5 py-1 rounded bg-neutral-200 dark:bg-white/10 text-[10px] text-neutral-800 dark:text-white uppercase font-bold tracking-widest hover:bg-neutral-300 dark:hover:bg-white/20 transition flex items-center space-x-1">
         <span id="copy-label">Copy</span>
       </button>
     </div>
 
     <!-- Key Metrics Bar -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto py-8 border-y border-white/[0.08] font-mono text-xs tracking-[0.2em] uppercase text-neutral-400 my-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto py-8 border-y border-neutral-200 dark:border-white/[0.08] font-mono text-xs tracking-[0.2em] uppercase text-neutral-600 dark:text-neutral-400 my-8">
       <div class="flex flex-col space-y-1">
-        <span class="text-[10px] text-neutral-500">CPU INFERENCE LATENCY</span>
-        <span class="text-white font-bold text-sm tracking-widest">148 ± 12 ms (0 GPU Needed)</span>
+        <span class="text-[10px] text-neutral-500 dark:text-neutral-500 font-semibold">CPU INFERENCE LATENCY</span>
+        <span class="text-neutral-900 dark:text-white font-bold text-sm tracking-widest">148 ± 12 ms (0 GPU Needed)</span>
       </div>
-      <div class="flex flex-col space-y-1 border-y md:border-y-0 md:border-x border-white/[0.08] py-4 md:py-0">
-        <span class="text-[10px] text-neutral-500">PREMATURE SEPARATION</span>
-        <span class="text-white font-bold text-sm tracking-widest">0.990 ROC-AUC (100% Det.)</span>
+      <div class="flex flex-col space-y-1 border-y md:border-y-0 md:border-x border-neutral-200 dark:border-white/[0.08] py-4 md:py-0">
+        <span class="text-[10px] text-neutral-500 dark:text-neutral-500 font-semibold">PREMATURE SEPARATION</span>
+        <span class="text-neutral-900 dark:text-white font-bold text-sm tracking-widest">0.990 ROC-AUC (100% Det.)</span>
       </div>
       <div class="flex flex-col space-y-1">
-        <span class="text-[10px] text-neutral-500">ROUTING PASS PRECISION</span>
-        <span class="text-white font-bold text-sm tracking-widest">99.3% Prec_pass Threshold</span>
+        <span class="text-[10px] text-neutral-500 dark:text-neutral-500 font-semibold">ROUTING PASS PRECISION</span>
+        <span class="text-neutral-900 dark:text-white font-bold text-sm tracking-widest">99.3% Prec_pass Threshold</span>
       </div>
     </div>
 
     <!-- Action Buttons -->
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
-      <a href="#demo" class="silver-btn px-8 py-4 rounded-xl font-mono text-xs font-bold uppercase tracking-[0.25em] w-full sm:w-auto">
+      <a href="#demo" class="btn-primary px-8 py-4 rounded-xl font-mono text-xs font-bold uppercase tracking-[0.25em] w-full sm:w-auto transition">
         Test Interactive Scorer
       </a>
-      <a href="https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM/blob/main/camera_ready/IDCIoT_154_CameraReady.pdf" target="_blank" class="glass-btn px-8 py-4 rounded-xl font-mono text-xs text-white uppercase tracking-[0.2em] w-full sm:w-auto flex items-center justify-center space-x-2">
-        <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <a href="https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM/blob/main/camera_ready/IDCIoT_154_CameraReady.pdf" target="_blank" class="px-8 py-4 rounded-xl border border-neutral-300 dark:border-white/[0.15] bg-white dark:bg-white/[0.02] hover:bg-neutral-50 dark:hover:bg-white/[0.06] font-mono text-xs text-neutral-900 dark:text-white uppercase tracking-[0.2em] w-full sm:w-auto flex items-center justify-center space-x-2 transition shadow-sm">
+        <svg class="w-4 h-4 text-neutral-500 dark:text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         <span>Read Paper PDF (6 Pages)</span>
       </a>
     </div>
@@ -270,32 +250,32 @@
   <!-- ========================================================================= -->
   <!-- 3. LIVE INTERACTIVE DEMO & ANIMATED MARKOV FLOW GRAPH -->
   <!-- ========================================================================= -->
-  <section id="demo" class="w-[92vw] mx-auto mt-20 p-8 md:p-14 rounded-3xl frosted-glass border border-white/[0.08]">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-6 border-b border-white/[0.08]">
+  <section id="demo" class="w-[92vw] max-w-7xl mx-auto mt-20 p-8 md:p-14 rounded-3xl theme-card">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-6 border-b border-neutral-200 dark:border-white/[0.08]">
       <div>
-        <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500">LIVE WORKSPACE</span>
-        <h2 class="font-serif italic text-3xl md:text-5xl text-white mt-1">Interactive Plausibility Scorer</h2>
+        <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-bold">LIVE WORKSPACE</span>
+        <h2 class="font-serif italic text-3xl md:text-5xl text-neutral-900 dark:text-white mt-1">Interactive Plausibility Scorer</h2>
       </div>
-      <div class="mt-4 md:mt-0 font-mono text-xs text-neutral-400 tracking-wider">
+      <div class="mt-4 md:mt-0 font-mono text-xs text-neutral-600 dark:text-neutral-400 tracking-wider">
         SELECT BENCHMARK PRESET: 
-        <button onclick="loadPreset('valid')" class="underline hover:text-white mr-3 text-neutral-300 font-semibold transition">Valid Derivation</button>
-        <button onclick="loadPreset('loop')" class="underline hover:text-white mr-3 text-amber-400 transition">Circular Loop</button>
-        <button onclick="loadPreset('premature')" class="underline hover:text-white text-red-400 transition">Premature Jump</button>
+        <button onclick="loadPreset('valid')" class="underline hover:text-black dark:hover:text-white mr-3 text-neutral-800 dark:text-neutral-300 font-semibold transition">Valid Derivation</button>
+        <button onclick="loadPreset('loop')" class="underline hover:text-black dark:hover:text-white mr-3 text-amber-600 dark:text-amber-400 font-semibold transition">Circular Loop</button>
+        <button onclick="loadPreset('premature')" class="underline hover:text-black dark:hover:text-white text-red-600 dark:text-red-400 font-semibold transition">Premature Jump</button>
       </div>
     </div>
 
     <!-- Live Dynamic Markov Flow Graph Canvas Component -->
-    <div class="mb-8 p-6 rounded-2xl bg-black/60 border border-white/[0.08] relative overflow-hidden">
+    <div class="mb-8 p-6 rounded-2xl bg-neutral-100 dark:bg-black/60 border border-neutral-200 dark:border-white/[0.08] relative overflow-hidden">
       <div class="flex items-center justify-between mb-4">
-        <span class="font-mono text-[10px] uppercase tracking-widest text-neutral-500 flex items-center space-x-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        <span class="font-mono text-[10px] uppercase tracking-widest text-neutral-500 font-semibold flex items-center space-x-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
           <span>REAL-TIME MARKOV TRANSITION TOPOLOGY GRAPH</span>
         </span>
-        <span id="topology-status" class="font-mono text-[10px] text-emerald-400 tracking-wider">STABLE DEDUCTION TOPOLOGY</span>
+        <span id="topology-status" class="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-bold tracking-wider">STABLE DEDUCTION TOPOLOGY</span>
       </div>
 
       <!-- Interactive SVG Flow Nodes -->
-      <div class="w-full overflow-x-auto py-4">
+      <div class="w-full overflow-x-auto py-2">
         <div id="flow-graph" class="flex items-center justify-start md:justify-center min-w-[650px] space-x-3 font-mono text-xs">
           <!-- Flow generated dynamically via JavaScript -->
         </div>
@@ -306,15 +286,15 @@
       <!-- Input Column -->
       <div class="flex flex-col space-y-4">
         <div class="flex items-center justify-between">
-          <label class="font-mono text-xs uppercase tracking-widest text-neutral-400">
+          <label class="font-mono text-xs uppercase tracking-widest text-neutral-700 dark:text-neutral-400 font-semibold">
             Chain-of-Thought Reasoning Input
           </label>
-          <span class="font-mono text-[10px] text-neutral-500">Editable natural text</span>
+          <span class="font-mono text-[10px] text-neutral-500 font-medium">Editable natural text</span>
         </div>
         <textarea 
           id="reasoning-input" 
           rows="9" 
-          class="w-full bg-black/50 border border-white/[0.08] rounded-2xl p-5 font-mono text-xs tracking-wide text-neutral-200 focus:outline-none focus:border-white/30 transition resize-none leading-relaxed"
+          class="w-full bg-white dark:bg-black/50 border border-neutral-300 dark:border-white/[0.08] rounded-2xl p-5 font-mono text-xs tracking-wide text-neutral-800 dark:text-neutral-200 focus:outline-none focus:border-neutral-500 dark:focus:border-white/30 transition resize-none leading-relaxed shadow-inner"
           placeholder="Paste reasoning steps here..."
         >The problem asks for the total quantity of apples.
 Let x be the number of apples in the basket.
@@ -324,7 +304,7 @@ Therefore, the total answer is 20.</textarea>
         
         <button 
           onclick="runAnalysis()" 
-          class="silver-btn w-full py-4 rounded-xl font-mono text-xs font-bold uppercase tracking-[0.25em] flex items-center justify-center space-x-2"
+          class="btn-primary w-full py-4 rounded-xl font-mono text-xs font-bold uppercase tracking-[0.25em] flex items-center justify-center space-x-2 transition"
         >
           <span>Run 148ms Structural Evaluation</span>
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
@@ -332,11 +312,11 @@ Therefore, the total answer is 20.</textarea>
       </div>
 
       <!-- Live Diagnosis Output Column -->
-      <div class="bg-black/60 border border-white/[0.08] rounded-2xl p-6 flex flex-col justify-between">
+      <div class="bg-neutral-50 dark:bg-black/60 border border-neutral-200 dark:border-white/[0.08] rounded-2xl p-6 flex flex-col justify-between">
         <div>
-          <div class="flex items-center justify-between pb-4 border-b border-white/[0.08]">
-            <span class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">DECOMPOSED 8-TAG OPERATIONAL SEQUENCE</span>
-            <span id="eval-timer" class="font-mono text-[10px] text-emerald-400 tracking-wider">EXEC: 1.60 ms (CPU)</span>
+          <div class="flex items-center justify-between pb-4 border-b border-neutral-200 dark:border-white/[0.08]">
+            <span class="font-mono text-[10px] uppercase tracking-widest text-neutral-500 font-semibold">DECOMPOSED 8-TAG OPERATIONAL SEQUENCE</span>
+            <span id="eval-timer" class="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-bold tracking-wider">EXEC: 1.60 ms (CPU)</span>
           </div>
 
           <!-- Tag Badges Container -->
@@ -345,45 +325,45 @@ Therefore, the total answer is 20.</textarea>
           </div>
 
           <!-- Metrics Row -->
-          <div class="grid grid-cols-2 gap-4 my-6 py-4 border-y border-white/[0.08] font-mono">
+          <div class="grid grid-cols-2 gap-4 my-6 py-4 border-y border-neutral-200 dark:border-white/[0.08] font-mono">
             <div>
-              <div class="text-[10px] text-neutral-500 uppercase tracking-widest">Ensemble Score</div>
-              <div id="metric-score" class="text-2xl font-bold text-white tracking-wider">-0.9362</div>
+              <div class="text-[10px] text-neutral-500 font-semibold uppercase tracking-widest">Ensemble Score</div>
+              <div id="metric-score" class="text-2xl font-bold text-neutral-900 dark:text-white tracking-wider">-0.9362</div>
               <div class="text-[9px] text-neutral-500">Length-normalized log P(O|λ)</div>
             </div>
             <div>
-              <div class="text-[10px] text-neutral-500 uppercase tracking-widest">Structural Entropy H(O)</div>
-              <div id="metric-entropy" class="text-2xl font-bold text-emerald-400 tracking-wider">0.1442</div>
+              <div class="text-[10px] text-neutral-500 font-semibold uppercase tracking-widest">Structural Entropy H(O)</div>
+              <div id="metric-entropy" class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 tracking-wider">0.1442</div>
               <div class="text-[9px] text-neutral-500">Low posterior uncertainty</div>
             </div>
           </div>
         </div>
 
         <!-- Triage Verdict Banner -->
-        <div id="verdict-box" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
+        <div id="verdict-box" class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-between transition-colors">
           <div class="flex items-center space-x-3">
-            <span id="verdict-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span id="verdict-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
             <div>
-              <div id="verdict-title" class="font-mono text-xs font-bold text-white uppercase tracking-widest">HIGH-CONFIDENCE PASS TIER</div>
-              <div id="verdict-desc" class="font-sans text-[11px] text-neutral-400">99.3% precision threshold met. Bypass heavy downstream neural verifier.</div>
+              <div id="verdict-title" class="font-mono text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-widest">HIGH-CONFIDENCE PASS TIER</div>
+              <div id="verdict-desc" class="font-sans text-[11px] text-neutral-600 dark:text-neutral-400">99.3% precision threshold met. Bypass heavy downstream neural verifier.</div>
             </div>
           </div>
-          <span id="verdict-badge" class="font-mono text-[10px] px-2 py-1 bg-white/10 rounded uppercase text-white tracking-widest">TOP 35%</span>
+          <span id="verdict-badge" class="font-mono text-[10px] px-2 py-1 bg-neutral-200 dark:bg-white/10 rounded uppercase font-bold text-neutral-800 dark:text-white tracking-widest">TOP 35%</span>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 4. CLEAN ARCHITECTURAL PIPELINE (CODE & CARDS) -->
+  <!-- 4. CLEAN ARCHITECTURAL PIPELINE (CARDS) -->
   <!-- ========================================================================= -->
-  <section id="architecture" class="w-[92vw] mx-auto my-24">
+  <section id="architecture" class="w-[92vw] max-w-7xl mx-auto my-24">
     <div class="text-center max-w-3xl mx-auto mb-14">
-      <span class="font-mono text-[10px] uppercase tracking-[0.4em] text-neutral-500">METHODOLOGICAL BLUEPRINT</span>
-      <h2 class="font-serif italic text-4xl md:text-6xl text-white mt-2">
+      <span class="font-mono text-[10px] uppercase tracking-[0.4em] text-neutral-500 font-bold">METHODOLOGICAL BLUEPRINT</span>
+      <h2 class="font-serif italic text-4xl md:text-6xl text-neutral-900 dark:text-white mt-2">
         The 3-Stage Neuro-Symbolic Engine
       </h2>
-      <p class="font-sans text-neutral-400 text-sm mt-4">
+      <p class="font-sans text-neutral-600 dark:text-neutral-400 text-sm mt-4">
         Eliminating heavy neural verifiers by modeling reasoning syntax as a discrete Markovian sequence.
       </p>
     </div>
@@ -392,53 +372,53 @@ Therefore, the total answer is 20.</textarea>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       
       <!-- Stage 1 -->
-      <div class="bento-card rounded-3xl p-8 flex flex-col justify-between">
+      <div class="theme-card rounded-3xl p-8 flex flex-col justify-between">
         <div>
-          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-6">STAGE 01 // SYNTACTIC ABSTRACTION</div>
-          <h3 class="font-serif italic text-3xl text-white mb-3">8-Tag Grammar</h3>
-          <p class="font-mono text-xs text-neutral-400 leading-relaxed mb-6">
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-bold mb-6">STAGE 01 // SYNTACTIC ABSTRACTION</div>
+          <h3 class="font-serif italic text-3xl text-neutral-900 dark:text-white mb-3">8-Tag Grammar</h3>
+          <p class="font-mono text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6">
             Prioritized deterministic regex decouples surface lexical realization from reasoning topology in &lt;18ms.
           </p>
         </div>
-        <div class="p-4 rounded-xl bg-black/60 border border-white/[0.06] font-mono text-[11px] space-y-2 text-neutral-300">
-          <div class="flex justify-between"><span class="text-white font-bold">PR → Restatement</span><span class="text-neutral-500">Setup</span></div>
-          <div class="flex justify-between"><span class="text-white font-bold">EQ → Equation</span><span class="text-neutral-500">Hypothesis</span></div>
-          <div class="flex justify-between"><span class="text-white font-bold">CA → Calculation</span><span class="text-neutral-500">Operation</span></div>
-          <div class="flex justify-between"><span class="text-white font-bold">CO → Conclusion</span><span class="text-neutral-500">Terminal</span></div>
+        <div class="p-4 rounded-xl bg-neutral-100 dark:bg-black/60 border border-neutral-200 dark:border-white/[0.06] font-mono text-[11px] space-y-2 text-neutral-700 dark:text-neutral-300">
+          <div class="flex justify-between"><span class="font-bold text-neutral-900 dark:text-white">PR → Restatement</span><span class="text-neutral-500">Setup</span></div>
+          <div class="flex justify-between"><span class="font-bold text-neutral-900 dark:text-white">EQ → Equation</span><span class="text-neutral-500">Hypothesis</span></div>
+          <div class="flex justify-between"><span class="font-bold text-neutral-900 dark:text-white">CA → Calculation</span><span class="text-neutral-500">Operation</span></div>
+          <div class="flex justify-between"><span class="font-bold text-neutral-900 dark:text-white">CO → Conclusion</span><span class="text-neutral-500">Terminal</span></div>
         </div>
       </div>
 
       <!-- Stage 2 -->
-      <div class="bento-card rounded-3xl p-8 flex flex-col justify-between">
+      <div class="theme-card rounded-3xl p-8 flex flex-col justify-between">
         <div>
-          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-6">STAGE 02 // PROBABILISTIC MODELING</div>
-          <h3 class="font-serif italic text-3xl text-white mb-3">M=12 Ensemble</h3>
-          <p class="font-mono text-xs text-neutral-400 leading-relaxed mb-6">
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-bold mb-6">STAGE 02 // PROBABILISTIC MODELING</div>
+          <h3 class="font-serif italic text-3xl text-neutral-900 dark:text-white mb-3">M=12 Ensemble</h3>
+          <p class="font-mono text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6">
             Multi-resolution Hidden Markov Models across state complexities K ∈ {3, 5, 8, 12} trained solely on verified positive traces.
           </p>
         </div>
-        <div class="p-4 rounded-xl bg-black/60 border border-white/[0.06] font-mono text-[11px] space-y-2 text-neutral-300">
-          <div class="flex justify-between"><span>Training Data:</span><span class="text-emerald-400 font-bold">One-Class (Positive only)</span></div>
-          <div class="flex justify-between"><span>Optimization:</span><span class="text-white">Baum-Welch EM</span></div>
-          <div class="flex justify-between"><span>Scoring Algorithm:</span><span class="text-white">Forward α_t(j) Recursion</span></div>
-          <div class="flex justify-between"><span>Normalization:</span><span class="text-white">1/T (Zero length bias)</span></div>
+        <div class="p-4 rounded-xl bg-neutral-100 dark:bg-black/60 border border-neutral-200 dark:border-white/[0.06] font-mono text-[11px] space-y-2 text-neutral-700 dark:text-neutral-300">
+          <div class="flex justify-between"><span>Training Data:</span><span class="text-emerald-600 dark:text-emerald-400 font-bold">One-Class (Positive only)</span></div>
+          <div class="flex justify-between"><span>Optimization:</span><span class="font-semibold text-neutral-900 dark:text-white">Baum-Welch EM</span></div>
+          <div class="flex justify-between"><span>Scoring Algorithm:</span><span class="font-semibold text-neutral-900 dark:text-white">Forward α_t(j) Recursion</span></div>
+          <div class="flex justify-between"><span>Normalization:</span><span class="font-semibold text-neutral-900 dark:text-white">1/T (Zero length bias)</span></div>
         </div>
       </div>
 
       <!-- Stage 3 -->
-      <div class="bento-card rounded-3xl p-8 flex flex-col justify-between">
+      <div class="theme-card rounded-3xl p-8 flex flex-col justify-between">
         <div>
-          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-6">STAGE 03 // ADAPTIVE DECISION</div>
-          <h3 class="font-serif italic text-3xl text-white mb-3">3-Tier Routing Gate</h3>
-          <p class="font-mono text-xs text-neutral-400 leading-relaxed mb-6">
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-bold mb-6">STAGE 03 // ADAPTIVE DECISION</div>
+          <h3 class="font-serif italic text-3xl text-neutral-900 dark:text-white mb-3">3-Tier Routing Gate</h3>
+          <p class="font-mono text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6">
             Triages reasoning chains into fast pass, secondary escalation, or early abort prior to full token generation.
           </p>
         </div>
-        <div class="p-4 rounded-xl bg-black/60 border border-white/[0.06] font-mono text-[11px] space-y-2 text-neutral-300">
-          <div class="flex justify-between"><span class="text-emerald-400 font-bold">Top 35% (Pass):</span><span class="text-white">99.3% Precision</span></div>
-          <div class="flex justify-between"><span class="text-amber-400 font-bold">Middle 35% (Retry):</span><span class="text-neutral-400">Re-sample</span></div>
-          <div class="flex justify-between"><span class="text-red-400 font-bold">Bottom 30% (Reject):</span><span class="text-neutral-400">93.1% Error Rate</span></div>
-          <div class="flex justify-between border-t border-white/[0.06] pt-1"><span>Token Savings:</span><span class="text-white font-bold">42% - 47%</span></div>
+        <div class="p-4 rounded-xl bg-neutral-100 dark:bg-black/60 border border-neutral-200 dark:border-white/[0.06] font-mono text-[11px] space-y-2 text-neutral-700 dark:text-neutral-300">
+          <div class="flex justify-between"><span class="text-emerald-600 dark:text-emerald-400 font-bold">Top 35% (Pass):</span><span class="font-semibold text-neutral-900 dark:text-white">99.3% Precision</span></div>
+          <div class="flex justify-between"><span class="text-amber-600 dark:text-amber-400 font-bold">Middle 35% (Retry):</span><span class="text-neutral-500">Re-sample</span></div>
+          <div class="flex justify-between"><span class="text-red-600 dark:text-red-400 font-bold">Bottom 30% (Reject):</span><span class="text-neutral-500">93.1% Error Rate</span></div>
+          <div class="flex justify-between border-t border-neutral-200 dark:border-white/[0.06] pt-1"><span>Token Savings:</span><span class="font-bold text-neutral-900 dark:text-white">42% - 47%</span></div>
         </div>
       </div>
 
@@ -448,67 +428,67 @@ Therefore, the total answer is 20.</textarea>
   <!-- ========================================================================= -->
   <!-- 5. BENCHMARK RESULTS (BENTO GRID) -->
   <!-- ========================================================================= -->
-  <section id="benchmarks" class="w-[92vw] mx-auto my-24">
+  <section id="benchmarks" class="w-[92vw] max-w-7xl mx-auto my-24">
     <div class="text-center max-w-3xl mx-auto mb-14">
-      <span class="font-mono text-[10px] uppercase tracking-[0.4em] text-neutral-500">RIGOROUS VERIFICATION</span>
-      <h2 class="font-serif italic text-4xl md:text-6xl text-white mt-2">
+      <span class="font-mono text-[10px] uppercase tracking-[0.4em] text-neutral-500 font-bold">RIGOROUS VERIFICATION</span>
+      <h2 class="font-serif italic text-4xl md:text-6xl text-neutral-900 dark:text-white mt-2">
         Benchmarked Against State-of-the-Art
       </h2>
     </div>
 
-    <div class="border-t border-l border-white/[0.08] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <!-- Bento 01 -->
-      <div class="bento-card p-8 border-b border-r border-white/[0.08] flex flex-col justify-between">
+      <div class="theme-card rounded-2xl p-8 flex flex-col justify-between">
         <div>
-          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-6">01 // PREMATURE CONCLUSION</div>
-          <h3 class="font-serif italic text-3xl text-white mb-3 leading-tight">0.990 AUC.</h3>
-          <p class="font-mono text-xs text-neutral-400 uppercase tracking-wider leading-relaxed">
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-bold mb-6">01 // PREMATURE CONCLUSION</div>
+          <h3 class="font-serif italic text-3xl text-neutral-900 dark:text-white mb-3 leading-tight">0.990 AUC.</h3>
+          <p class="font-mono text-xs text-neutral-600 dark:text-neutral-400 uppercase tracking-wider leading-relaxed">
             100% detection rate on skipped derivation steps. Uncharacteristic jumps directly to final answers incur severe likelihood penalties.
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/[0.04] font-mono text-[10px] text-neutral-500">
+        <div class="mt-6 pt-4 border-t border-neutral-200 dark:border-white/[0.04] font-mono text-[10px] text-neutral-500 font-semibold">
           Cohen's d = 4.166 (Large effect)
         </div>
       </div>
 
       <!-- Bento 02 -->
-      <div class="bento-card p-8 border-b border-r border-white/[0.08] flex flex-col justify-between">
+      <div class="theme-card rounded-2xl p-8 flex flex-col justify-between">
         <div>
-          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-6">02 // CIRCULAR LOOPS</div>
-          <h3 class="font-serif italic text-3xl text-white mb-3 leading-tight">0.761 AUC.</h3>
-          <p class="font-mono text-xs text-neutral-400 uppercase tracking-wider leading-relaxed">
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-bold mb-6">02 // CIRCULAR LOOPS</div>
+          <h3 class="font-serif italic text-3xl text-neutral-900 dark:text-white mb-3 leading-tight">0.761 AUC.</h3>
+          <p class="font-mono text-xs text-neutral-600 dark:text-neutral-400 uppercase tracking-wider leading-relaxed">
             Detects repetitive cyclic inference loops. In uncorrupted outputs, 77.8% of looping chains were mathematically wrong (p = 6.3 × 10⁻¹⁰).
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/[0.04] font-mono text-[10px] text-neutral-500">
+        <div class="mt-6 pt-4 border-t border-neutral-200 dark:border-white/[0.04] font-mono text-[10px] text-neutral-500 font-semibold">
           84.6% loop detection rate
         </div>
       </div>
 
       <!-- Bento 03 -->
-      <div class="bento-card p-8 border-b border-r border-white/[0.08] flex flex-col justify-between">
+      <div class="theme-card rounded-2xl p-8 flex flex-col justify-between">
         <div>
-          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-6">03 // ZERO-SHOT TRANSFER</div>
-          <h3 class="font-serif italic text-3xl text-white mb-3 leading-tight">>0.98 AUC.</h3>
-          <p class="font-mono text-xs text-neutral-400 uppercase tracking-wider leading-relaxed">
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-bold mb-6">03 // ZERO-SHOT TRANSFER</div>
+          <h3 class="font-serif italic text-3xl text-neutral-900 dark:text-white mb-3 leading-tight">>0.98 AUC.</h3>
+          <p class="font-mono text-xs text-neutral-600 dark:text-neutral-400 uppercase tracking-wider leading-relaxed">
             Trained only on Qwen2.5-0.5B, structural transition grammar transfers without retraining to Llama-3.2 (0.985), Phi-3 (0.981), and Mistral-7B (0.992).
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/[0.04] font-mono text-[10px] text-neutral-500">
+        <div class="mt-6 pt-4 border-t border-neutral-200 dark:border-white/[0.04] font-mono text-[10px] text-neutral-500 font-semibold">
           Pearson r > 0.94 (p &lt; 0.001)
         </div>
       </div>
 
       <!-- Bento 04 -->
-      <div class="bento-card p-8 border-b border-r border-white/[0.08] flex flex-col justify-between">
+      <div class="theme-card rounded-2xl p-8 flex flex-col justify-between">
         <div>
-          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-6">04 // ARITHMETIC CONTROL</div>
-          <h3 class="font-serif italic text-3xl text-white mb-3 leading-tight">0.501 AUC.</h3>
-          <p class="font-mono text-xs text-neutral-400 uppercase tracking-wider leading-relaxed">
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-bold mb-6">04 // ARITHMETIC CONTROL</div>
+          <h3 class="font-serif italic text-3xl text-neutral-900 dark:text-white mb-3 leading-tight">0.501 AUC.</h3>
+          <p class="font-mono text-xs text-neutral-600 dark:text-neutral-400 uppercase tracking-wider leading-relaxed">
             Rigorously demonstrates structural orthogonality: pure arithmetic errors retain valid deduction grammar, functioning in synergy with symbolic calculators.
           </p>
         </div>
-        <div class="mt-6 pt-4 border-t border-white/[0.04] font-mono text-[10px] text-neutral-500">
+        <div class="mt-6 pt-4 border-t border-neutral-200 dark:border-white/[0.04] font-mono text-[10px] text-neutral-500 font-semibold">
           Strict structural boundary proven
         </div>
       </div>
@@ -518,35 +498,35 @@ Therefore, the total answer is 20.</textarea>
   <!-- ========================================================================= -->
   <!-- 6. PYTHON QUICKSTART & REPRODUCIBILITY -->
   <!-- ========================================================================= -->
-  <section id="reproducibility" class="w-[92vw] mx-auto my-24 p-8 md:p-14 rounded-3xl frosted-glass border border-white/[0.08]">
+  <section id="reproducibility" class="w-[92vw] max-w-7xl mx-auto my-24 p-8 md:p-14 rounded-3xl theme-card">
     <div class="max-w-3xl mb-8">
-      <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500">OPEN ARTIFACTS</span>
-      <h2 class="font-serif italic text-3xl md:text-5xl text-white mt-1">Get Started in 3 Lines of Python</h2>
-      <p class="font-sans text-sm text-neutral-400 mt-2">
+      <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-bold">OPEN ARTIFACTS</span>
+      <h2 class="font-serif italic text-3xl md:text-5xl text-neutral-900 dark:text-white mt-1">Get Started in 3 Lines of Python</h2>
+      <p class="font-sans text-sm text-neutral-600 dark:text-neutral-400 mt-2 font-normal">
         CoT-HMM is completely open-source and installable directly from GitHub without heavy GPU dependencies.
       </p>
     </div>
 
     <div class="space-y-4">
-      <div class="bg-black/80 rounded-2xl p-5 border border-white/[0.08]">
-        <div class="font-mono text-xs text-neutral-500 mb-2">// 1. Install via pip</div>
-        <div class="font-mono text-xs text-emerald-400 flex items-center justify-between">
+      <div class="bg-neutral-100 dark:bg-black/80 rounded-2xl p-5 border border-neutral-200 dark:border-white/[0.08]">
+        <div class="font-mono text-xs text-neutral-500 mb-2 font-semibold">// 1. Install via pip</div>
+        <div class="font-mono text-xs text-emerald-700 dark:text-emerald-400 flex items-center justify-between font-bold">
           <code>pip install git+https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM.git</code>
         </div>
       </div>
 
-      <div class="bg-black/80 rounded-2xl p-5 border border-white/[0.08]">
-        <div class="font-mono text-xs text-neutral-500 mb-2">// 2. Evaluate reasoning plausibility</div>
-        <pre class="font-mono text-xs text-neutral-300 leading-relaxed overflow-x-auto">
-<span class="text-neutral-500">from</span> cot_hmm <span class="text-neutral-500">import</span> segment_and_clean, tag_steps, EnsembleScorer, EnsembleHMMTrainer
+      <div class="bg-neutral-100 dark:bg-black/80 rounded-2xl p-5 border border-neutral-200 dark:border-white/[0.08]">
+        <div class="font-mono text-xs text-neutral-500 mb-2 font-semibold">// 2. Evaluate reasoning plausibility</div>
+        <pre class="font-mono text-xs text-neutral-800 dark:text-neutral-300 leading-relaxed overflow-x-auto">
+<span class="text-neutral-500 dark:text-neutral-500 font-bold">from</span> cot_hmm <span class="text-neutral-500 dark:text-neutral-500 font-bold">import</span> segment_and_clean, tag_steps, EnsembleScorer, EnsembleHMMTrainer
 
-<span class="text-neutral-500"># Decompose raw reasoning text into the 8 semantic tags</span>
-trace = <span class="text-neutral-400">"Let x = 12. We calculate 12 + 8 = 20. Therefore, the answer is 20."</span>
+<span class="text-neutral-500 dark:text-neutral-500">// Decompose raw reasoning text into the 8 semantic tags</span>
+trace = <span class="text-neutral-600 dark:text-neutral-400 font-medium">"Let x = 12. We calculate 12 + 8 = 20. Therefore, the answer is 20."</span>
 tags = tag_steps(segment_and_clean(trace))
-<span class="text-neutral-500">print</span>(tags)  <span class="text-emerald-400"># ['EQ', 'CA', 'CO']</span>
+<span class="text-neutral-500 dark:text-neutral-500 font-bold">print</span>(tags)  <span class="text-emerald-700 dark:text-emerald-400 font-bold"># ['EQ', 'CA', 'CO']</span>
 
-<span class="text-neutral-500"># Score plausibility via Ensemble HMM (M=12 models)</span>
-<span class="text-neutral-500"># Low scoring chains (&lt; -14.28) are flagged as premature jumps or loops</span></pre>
+<span class="text-neutral-500 dark:text-neutral-500">// Score plausibility via Ensemble HMM (M=12 models)</span>
+<span class="text-neutral-500 dark:text-neutral-500">// Low scoring chains (&lt; -14.28) are flagged as premature jumps or loops</span></pre>
       </div>
     </div>
   </section>
@@ -554,36 +534,36 @@ tags = tag_steps(segment_and_clean(trace))
   <!-- ========================================================================= -->
   <!-- 7. AUTHORS & ACADEMIC LINEAGE -->
   <!-- ========================================================================= -->
-  <section class="w-[92vw] mx-auto my-24">
+  <section class="w-[92vw] max-w-7xl mx-auto my-24">
     <div class="text-center max-w-2xl mx-auto mb-14">
-      <span class="font-mono text-[10px] uppercase tracking-[0.4em] text-neutral-500">RESEARCH TEAM</span>
-      <h2 class="font-serif italic text-4xl text-white mt-1">Authors & Affiliations</h2>
+      <span class="font-mono text-[10px] uppercase tracking-[0.4em] text-neutral-500 font-bold">RESEARCH TEAM</span>
+      <h2 class="font-serif italic text-4xl text-neutral-900 dark:text-white mt-1">Authors & Affiliations</h2>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 font-mono">
-      <div class="p-6 frosted-glass rounded-2xl border border-white/[0.08]">
-        <div class="text-white text-sm font-bold">Gaurav Patil</div>
-        <div class="text-[10px] text-neutral-400 mt-1 uppercase">First & Corresponding</div>
+      <div class="p-6 theme-card rounded-2xl">
+        <div class="text-neutral-900 dark:text-white text-sm font-bold">Gaurav Patil</div>
+        <div class="text-[10px] text-neutral-500 dark:text-neutral-400 mt-1 uppercase font-semibold">First & Corresponding</div>
         <div class="text-[9px] text-neutral-500 mt-2">SIES GST, Navi Mumbai</div>
       </div>
-      <div class="p-6 frosted-glass rounded-2xl border border-white/[0.08]">
-        <div class="text-white text-sm font-bold">Suhail Shaikh</div>
-        <div class="text-[10px] text-neutral-400 mt-1 uppercase">Co-Author</div>
+      <div class="p-6 theme-card rounded-2xl">
+        <div class="text-neutral-900 dark:text-white text-sm font-bold">Suhail Shaikh</div>
+        <div class="text-[10px] text-neutral-500 dark:text-neutral-400 mt-1 uppercase font-semibold">Co-Author</div>
         <div class="text-[9px] text-neutral-500 mt-2">SIES GST, Navi Mumbai</div>
       </div>
-      <div class="p-6 frosted-glass rounded-2xl border border-white/[0.08]">
-        <div class="text-white text-sm font-bold">Bhagyalakshmi V</div>
-        <div class="text-[10px] text-neutral-400 mt-1 uppercase">Faculty Supervisor</div>
+      <div class="p-6 theme-card rounded-2xl">
+        <div class="text-neutral-900 dark:text-white text-sm font-bold">Bhagyalakshmi V</div>
+        <div class="text-[10px] text-neutral-500 dark:text-neutral-400 mt-1 uppercase font-semibold">Faculty Supervisor</div>
         <div class="text-[9px] text-neutral-500 mt-2">SIES GST, Navi Mumbai</div>
       </div>
-      <div class="p-6 frosted-glass rounded-2xl border border-white/[0.08]">
-        <div class="text-white text-sm font-bold">Parth Parmar</div>
-        <div class="text-[10px] text-neutral-400 mt-1 uppercase">Co-Author</div>
+      <div class="p-6 theme-card rounded-2xl">
+        <div class="text-neutral-900 dark:text-white text-sm font-bold">Parth Parmar</div>
+        <div class="text-[10px] text-neutral-500 dark:text-neutral-400 mt-1 uppercase font-semibold">Co-Author</div>
         <div class="text-[9px] text-neutral-500 mt-2">ATLAS SkillTech University</div>
       </div>
-      <div class="p-6 frosted-glass rounded-2xl border border-white/[0.08]">
-        <div class="text-white text-sm font-bold">Chirayu Marathe</div>
-        <div class="text-[10px] text-neutral-400 mt-1 uppercase">Co-Author</div>
+      <div class="p-6 theme-card rounded-2xl">
+        <div class="text-neutral-900 dark:text-white text-sm font-bold">Chirayu Marathe</div>
+        <div class="text-[10px] text-neutral-500 dark:text-neutral-400 mt-1 uppercase font-semibold">Co-Author</div>
         <div class="text-[9px] text-neutral-500 mt-2">SIES GST, Navi Mumbai</div>
       </div>
     </div>
@@ -592,32 +572,51 @@ tags = tag_steps(segment_and_clean(trace))
   <!-- ========================================================================= -->
   <!-- 8. FOOTER -->
   <!-- ========================================================================= -->
-  <footer class="w-[92vw] mx-auto py-12 border-t border-white/[0.08] flex flex-col md:flex-row items-center justify-between text-neutral-500 font-mono text-xs tracking-wider">
+  <footer class="w-[92vw] max-w-7xl mx-auto py-12 border-t border-neutral-200 dark:border-white/[0.08] flex flex-col md:flex-row items-center justify-between text-neutral-500 font-mono text-xs tracking-wider">
     <div>
       COT-HMM // IEEE IDCIoT 2027 (PAPER ID: IDCIoT-154)
     </div>
-    <div class="mt-4 md:mt-0 flex space-x-6 text-[11px]">
-      <a href="https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM" target="_blank" class="hover:text-white transition">GITHUB</a>
-      <a href="https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM/blob/main/camera_ready/IDCIoT_154_CameraReady.pdf" target="_blank" class="hover:text-white transition">CAMERA-READY PDF</a>
-      <a href="mailto:gauravppaiml123@gst.sies.edu.in" class="hover:text-white transition">CONTACT AUTHORS</a>
+    <div class="mt-4 md:mt-0 flex space-x-6 text-[11px] font-semibold">
+      <a href="https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM" target="_blank" class="hover:text-black dark:hover:text-white transition">GITHUB</a>
+      <a href="https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM/blob/main/camera_ready/IDCIoT_154_CameraReady.pdf" target="_blank" class="hover:text-black dark:hover:text-white transition">CAMERA-READY PDF</a>
+      <a href="mailto:gauravppaiml123@gst.sies.edu.in" class="hover:text-black dark:hover:text-white transition">CONTACT AUTHORS</a>
     </div>
   </footer>
 
   <!-- ========================================================================= -->
-  <!-- JAVASCRIPT: LENIS, CURSOR LIGHT, MARKOV FLOW, INTERACTIVE LOGIC -->
+  <!-- JAVASCRIPT: THEME TOGGLE, LENIS, FLOW GRAPH & LOGIC -->
   <!-- ========================================================================= -->
   <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
   <script>
-    // 1. Initialize Lenis Smooth Scroll
+    // 1. Light / Dark Theme Management with LocalStorage
+    function initTheme() {
+      const stored = localStorage.getItem('cot-hmm-theme');
+      if (stored === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+    }
+    initTheme();
+
+    function toggleTheme() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('cot-hmm-theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('cot-hmm-theme', 'dark');
+      }
+      runAnalysis(); // re-render graph badges with appropriate contrast
+    }
+
+    // 2. Initialize Lenis Smooth Scroll
     const lenis = new Lenis({
-      duration: 1.25,
+      duration: 1.15,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
-      gestureOrientation: 'vertical',
       smoothWheel: true,
       wheelMultiplier: 1.05,
-      touchMultiplier: 2,
-      infinite: false,
     });
 
     function raf(time) {
@@ -626,7 +625,6 @@ tags = tag_steps(segment_and_clean(trace))
     }
     requestAnimationFrame(raf);
 
-    // Smooth anchor navigation with Lenis
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
         const targetId = this.getAttribute('href');
@@ -634,17 +632,10 @@ tags = tag_steps(segment_and_clean(trace))
           const targetElem = document.querySelector(targetId);
           if (targetElem) {
             e.preventDefault();
-            lenis.scrollTo(targetElem, { offset: -40 });
+            lenis.scrollTo(targetElem, { offset: -50 });
           }
         }
       });
-    });
-
-    // 2. Interactive Mouse Cursor Spotlight
-    const spotlight = document.getElementById('cursor-spotlight');
-    window.addEventListener('mousemove', (e) => {
-      spotlight.style.left = e.clientX + 'px';
-      spotlight.style.top = e.clientY + 'px';
     });
 
     // 3. 1-Click Copy Pip Command
@@ -653,10 +644,10 @@ tags = tag_steps(segment_and_clean(trace))
       navigator.clipboard.writeText(text).then(() => {
         const label = document.getElementById('copy-label');
         label.innerText = 'COPIED!';
-        label.parentElement.classList.add('bg-emerald-500/20', 'text-emerald-300');
+        label.parentElement.classList.add('bg-emerald-500', 'text-white');
         setTimeout(() => {
           label.innerText = 'Copy';
-          label.parentElement.classList.remove('bg-emerald-500/20', 'text-emerald-300');
+          label.parentElement.classList.remove('bg-emerald-500', 'text-white');
         }, 2200);
       });
     }
@@ -683,8 +674,9 @@ Therefore, the final answer is 20.`
       runAnalysis();
     }
 
-    // 5. Client-side rule tagger emulator & Dynamic Flow Graph Generator
+    // 5. Client-side rule tagger & Dynamic Graph Generator
     function runAnalysis() {
+      const isDark = document.documentElement.classList.contains('dark');
       const text = document.getElementById('reasoning-input').value;
       const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
       
@@ -698,7 +690,7 @@ Therefore, the final answer is 20.`
       const detectedTags = [];
       const tagDetails = [];
       
-      lines.forEach((line, idx) => {
+      lines.forEach((line) => {
         let tag = "IN";
         let label = "Inference";
         const l = line.toLowerCase();
@@ -720,7 +712,9 @@ Therefore, the final answer is 20.`
         
         // Output badges
         const badge = document.createElement('span');
-        badge.className = "px-2.5 py-1 rounded bg-white/10 font-mono text-xs text-white border border-white/20";
+        badge.className = isDark 
+          ? "px-2.5 py-1 rounded bg-white/10 font-mono text-xs text-white border border-white/20"
+          : "px-2.5 py-1 rounded bg-neutral-200 font-mono text-xs text-neutral-800 border border-neutral-300 font-semibold";
         badge.innerText = `${tag} (${label})`;
         tagContainer.appendChild(badge);
       });
@@ -728,37 +722,38 @@ Therefore, the final answer is 20.`
       const isLoop = detectedTags.filter(t => t === 'IN').length >= 4;
       const isPremature = detectedTags.length <= 2 && detectedTags.includes('CO') && detectedTags.includes('PR');
 
-      // Build Interactive Flow Graph
+      // Build Graph Nodes
       tagDetails.forEach((item, index) => {
-        // Node
         const node = document.createElement('div');
-        let nodeColor = "border-white/20 bg-white/5 text-white";
+        let nodeColor = isDark 
+          ? "border-white/20 bg-white/5 text-white" 
+          : "border-neutral-300 bg-white text-neutral-800 shadow-sm";
+
         if (isPremature && item.tag === 'CO') {
-          nodeColor = "border-red-500/50 bg-red-500/10 text-red-300";
+          nodeColor = isDark ? "border-red-500/50 bg-red-500/20 text-red-200" : "border-red-300 bg-red-50 text-red-700 font-bold";
         } else if (isLoop && item.tag === 'IN') {
-          nodeColor = "border-amber-500/50 bg-amber-500/10 text-amber-300";
+          nodeColor = isDark ? "border-amber-500/50 bg-amber-500/20 text-amber-200" : "border-amber-300 bg-amber-50 text-amber-700 font-bold";
         } else if (!isLoop && !isPremature) {
-          nodeColor = "border-emerald-500/30 bg-emerald-500/10 text-emerald-200";
+          nodeColor = isDark ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-200" : "border-emerald-300 bg-emerald-50 text-emerald-800 font-bold";
         }
 
-        node.className = `px-3 py-2 rounded-xl border flex flex-col items-center ${nodeColor} shadow-md`;
+        node.className = `px-3.5 py-2 rounded-xl border flex flex-col items-center ${nodeColor}`;
         node.innerHTML = `
           <span class="font-bold text-xs">${item.tag}</span>
-          <span class="text-[9px] text-neutral-400 opacity-80 uppercase">${item.label}</span>
+          <span class="text-[9px] opacity-75 uppercase font-medium">${item.label}</span>
         `;
         flowGraph.appendChild(node);
 
-        // Arrow between nodes
         if (index < tagDetails.length - 1) {
           const arrow = document.createElement('div');
-          arrow.className = "flex items-center text-neutral-500 px-1";
+          arrow.className = "flex items-center px-1 font-bold";
           
           if (isPremature) {
-            arrow.innerHTML = `<span class="text-red-400 font-mono text-[10px] tracking-tighter">✕ (P &lt; 1e-4) →</span>`;
+            arrow.innerHTML = `<span class="text-red-500 font-mono text-[10px] tracking-tighter">✕ (P &lt; 1e-4) →</span>`;
           } else if (isLoop && item.tag === 'IN') {
-            arrow.innerHTML = `<span class="text-amber-400 font-mono text-[10px]">⟲ loop →</span>`;
+            arrow.innerHTML = `<span class="text-amber-500 font-mono text-[10px]">⟲ loop →</span>`;
           } else {
-            arrow.innerHTML = `<svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>`;
+            arrow.innerHTML = `<svg class="w-4 h-4 text-neutral-400 dark:text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>`;
           }
           flowGraph.appendChild(arrow);
         }
@@ -778,56 +773,55 @@ Therefore, the final answer is 20.`
 
       if (isPremature) {
         scoreElem.innerText = "-∞ (Inf)";
-        scoreElem.className = "text-2xl font-bold text-red-400 tracking-wider";
+        scoreElem.className = "text-2xl font-bold text-red-500 dark:text-red-400 tracking-wider";
         entropyElem.innerText = "0.7812";
-        entropyElem.className = "text-2xl font-bold text-red-400 tracking-wider";
+        entropyElem.className = "text-2xl font-bold text-red-500 dark:text-red-400 tracking-wider";
 
         topologyStatus.innerText = "PREMATURE DERIVATION BREAK (ABRUPT CONCLUSION)";
-        topologyStatus.className = "font-mono text-[10px] text-red-400 tracking-wider";
+        topologyStatus.className = "font-mono text-[10px] text-red-600 dark:text-red-400 font-bold tracking-wider";
 
-        verdictBox.className = "p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-between";
+        verdictBox.className = "p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 flex items-center justify-between";
         verdictTitle.innerText = "EARLY REJECT TIER (PREMATURE CONCLUSION)";
-        verdictTitle.className = "font-mono text-xs font-bold text-red-400 uppercase tracking-widest";
+        verdictTitle.className = "font-mono text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-widest";
         verdictDesc.innerText = "P(CO|PR) < 1e-4 transition violation. Early exit triggered prior to token generation.";
-        verdictDot.className = "w-2.5 h-2.5 rounded-full bg-red-400";
+        verdictDot.className = "w-2.5 h-2.5 rounded-full bg-red-500";
         verdictBadge.innerText = "REJECT";
-        verdictBadge.className = "font-mono text-[10px] px-2 py-1 bg-red-500/20 text-red-300 rounded uppercase tracking-widest";
+        verdictBadge.className = "font-mono text-[10px] px-2 py-1 bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-300 font-bold rounded uppercase tracking-widest";
       } else if (isLoop) {
         scoreElem.innerText = "-15.5307";
-        scoreElem.className = "text-2xl font-bold text-amber-400 tracking-wider";
+        scoreElem.className = "text-2xl font-bold text-amber-600 dark:text-amber-400 tracking-wider";
         entropyElem.innerText = "0.5420";
-        entropyElem.className = "text-2xl font-bold text-amber-400 tracking-wider";
+        entropyElem.className = "text-2xl font-bold text-amber-600 dark:text-amber-400 tracking-wider";
 
         topologyStatus.innerText = "DEGENERATIVE CYCLIC INFERENCE LOOP DETECTED";
-        topologyStatus.className = "font-mono text-[10px] text-amber-400 tracking-wider";
+        topologyStatus.className = "font-mono text-[10px] text-amber-600 dark:text-amber-400 font-bold tracking-wider";
 
-        verdictBox.className = "p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between";
+        verdictBox.className = "p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center justify-between";
         verdictTitle.innerText = "ESCALATION TIER (DEGENERATIVE LOOP)";
-        verdictTitle.className = "font-mono text-xs font-bold text-amber-400 uppercase tracking-widest";
+        verdictTitle.className = "font-mono text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest";
         verdictDesc.innerText = "High entropy & repetitive inference detected. Route to temperature re-sampling.";
-        verdictDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+        verdictDot.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
         verdictBadge.innerText = "ESCALATE";
-        verdictBadge.className = "font-mono text-[10px] px-2 py-1 bg-amber-500/20 text-amber-300 rounded uppercase tracking-widest";
+        verdictBadge.className = "font-mono text-[10px] px-2 py-1 bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold rounded uppercase tracking-widest";
       } else {
         scoreElem.innerText = "-0.9362";
-        scoreElem.className = "text-2xl font-bold text-white tracking-wider";
+        scoreElem.className = "text-2xl font-bold text-neutral-900 dark:text-white tracking-wider";
         entropyElem.innerText = "0.1442";
-        entropyElem.className = "text-2xl font-bold text-emerald-400 tracking-wider";
+        entropyElem.className = "text-2xl font-bold text-emerald-600 dark:text-emerald-400 tracking-wider";
 
         topologyStatus.innerText = "STABLE DEDUCTION TOPOLOGY VERIFIED";
-        topologyStatus.className = "font-mono text-[10px] text-emerald-400 tracking-wider";
+        topologyStatus.className = "font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-bold tracking-wider";
 
-        verdictBox.className = "p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between";
+        verdictBox.className = "p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-between";
         verdictTitle.innerText = "HIGH-CONFIDENCE PASS TIER";
-        verdictTitle.className = "font-mono text-xs font-bold text-white uppercase tracking-widest";
+        verdictTitle.className = "font-mono text-xs font-bold text-emerald-700 dark:text-white uppercase tracking-widest";
         verdictDesc.innerText = "99.3% precision threshold met. Bypass heavy downstream neural verifier.";
-        verdictDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+        verdictDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
         verdictBadge.innerText = "TOP 35%";
-        verdictBadge.className = "font-mono text-[10px] px-2 py-1 bg-white/10 text-white rounded uppercase tracking-widest";
+        verdictBadge.className = "font-mono text-[10px] px-2 py-1 bg-neutral-200 dark:bg-white/10 text-neutral-800 dark:text-white font-bold rounded uppercase tracking-widest";
       }
     }
 
-    // Run initial analysis on page load
     window.addEventListener('DOMContentLoaded', () => {
       runAnalysis();
     });
