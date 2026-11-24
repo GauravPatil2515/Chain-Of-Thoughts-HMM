@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cot-hmm"
+version = "1.0.0"
+authors = [
+  { name="Gaurav Patil", email="gauravppaiml123@gst.sies.edu.in" },
+  { name="Suhail Shaikh", email="suhailshaikh7505@gmail.com" },
+  { name="Bhagyalakshmi V", email="lakshmianand04@gmail.com" },
+  { name="Parth Parmar", email="parthparmar4105@gmail.com" },
+  { name="Chirayu Marathe", email="chirayusmarathe@gmail.com" },
+]
+description = "CoT-HMM: Structural Plausibility Scoring of Chain-of-Thought Reasoning via Hidden Markov Models (IEEE IDCIoT 2027)"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "numpy>=1.22.0",
+    "scipy>=1.8.0",
+    "hmmlearn>=0.3.0",
+    "scikit-learn>=1.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/GauravPatil2515/Chain-Of-Taughts-HMM"
+"Paper" = "https://github.com/GauravPatil2515/Chain-Of-Taughts-HMM/blob/main/camera_ready/IDCIoT_154_CameraReady.pdf"
+"Bug Tracker" = "https://github.com/GauravPatil2515/Chain-Of-Taughts-HMM/issues"
