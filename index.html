@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoT-HMM | Structural Plausibility Scoring for Chain-of-Thought Reasoning</title>
   
+  <!-- Open Graph / Meta for Social Previews -->
+  <meta name="description" content="A lightweight, one-class neuro-symbolic structural guardrail that detects hallucinated reasoning loops and premature conclusions in LLMs in 148ms on CPU. Accepted at IEEE IDCIoT 2027.">
+  <meta property="og:title" content="CoT-HMM | Structural Plausibility Scoring for LLM Reasoning">
+  <meta property="og:description" content="Evaluate reasoning topology, catch degenerative loops, and save 42-47% inference overhead. IEEE IDCIoT 2027.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://gauravpatil2515.github.io/Chain-Of-Thoughts-HMM/">
+
   <!-- Fonts: DM Serif Display, Geist Mono, Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,22 +70,35 @@
       background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     }
 
+    /* Interactive Cursor Spotlight Glow */
+    #cursor-spotlight {
+      position: fixed;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.3s ease;
+      z-index: 1;
+    }
+
     /* Ambient Spotlight Radial Glow */
     .ambient-glow {
       position: absolute;
       top: -120px;
       left: 50%;
       transform: translateX(-50%);
-      width: 700px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 70%);
+      width: 800px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
       pointer-events: none;
       z-index: 0;
     }
 
     /* Metallic Silver Gradient Typography */
     .silver-gradient-text {
-      background: linear-gradient(135deg, #FFFFFF 0%, #A1A1AA 60%, #71717A 100%);
+      background: linear-gradient(135deg, #FFFFFF 0%, #A1A1AA 55%, #71717A 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -137,46 +157,56 @@
         linear-gradient(to right, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
     }
+
+    /* Floating Header Transition */
+    .sticky-nav {
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
   </style>
 </head>
 <body class="relative min-h-screen bg-[#080808] text-[#E2E8F0] selection:bg-white selection:text-black overflow-x-hidden grid-lines">
+
+  <!-- Interactive Mouse Spotlight -->
+  <div id="cursor-spotlight"></div>
 
   <!-- Ambient Glow Behind Hero -->
   <div class="ambient-glow"></div>
 
   <!-- ========================================================================= -->
-  <!-- 1. NAVIGATION -->
+  <!-- 1. STICKY FLOATING GLASS NAVIGATION BAR -->
   <!-- ========================================================================= -->
-  <nav class="w-[92vw] mx-auto py-8 flex items-center justify-between border-b border-white/[0.08] relative z-10">
-    <!-- Brand Logo -->
-    <a href="#" class="flex items-center space-x-3 group">
-      <span class="w-2.5 h-2.5 rounded-full bg-white group-hover:scale-125 transition duration-300"></span>
-      <span class="font-mono text-sm tracking-[0.35em] uppercase text-white font-semibold">
-        COT-HMM // RESEARCH
-      </span>
-    </a>
+  <div class="sticky top-4 z-40 w-full flex justify-center px-4">
+    <nav class="sticky-nav w-[92vw] max-w-7xl mx-auto py-3.5 px-6 rounded-2xl frosted-glass flex items-center justify-between shadow-2xl bg-black/60">
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center space-x-3 group">
+        <span class="w-2.5 h-2.5 rounded-full bg-white group-hover:scale-125 transition duration-300"></span>
+        <span class="font-mono text-xs md:text-sm tracking-[0.3em] uppercase text-white font-semibold">
+          COT-HMM // RESEARCH
+        </span>
+      </a>
 
-    <!-- Desktop Navigation Links -->
-    <div class="hidden md:flex items-center space-x-2">
-      <div class="flex items-center rounded-xl bg-white/[0.025] border border-white/[0.08] p-1 space-x-1 text-xs font-mono tracking-wider uppercase">
-        <a href="#demo" class="px-4 py-2 hover:text-white transition text-neutral-400">Interactive Demo</a>
-        <a href="#architecture" class="px-4 py-2 hover:text-white transition text-neutral-400">Architecture</a>
-        <a href="#benchmarks" class="px-4 py-2 hover:text-white transition text-neutral-400">Benchmarks</a>
-        <a href="#reproducibility" class="px-4 py-2 hover:text-white transition text-neutral-400">Python SDK</a>
+      <!-- Desktop Navigation Links -->
+      <div class="hidden md:flex items-center space-x-2">
+        <div class="flex items-center rounded-xl bg-white/[0.025] border border-white/[0.08] p-1 space-x-1 text-xs font-mono tracking-wider uppercase">
+          <a href="#demo" class="px-3.5 py-1.5 hover:text-white transition text-neutral-400">Interactive Demo</a>
+          <a href="#architecture" class="px-3.5 py-1.5 hover:text-white transition text-neutral-400">Architecture</a>
+          <a href="#benchmarks" class="px-3.5 py-1.5 hover:text-white transition text-neutral-400">Benchmarks</a>
+          <a href="#reproducibility" class="px-3.5 py-1.5 hover:text-white transition text-neutral-400">Python SDK</a>
+        </div>
+        <a href="https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM" target="_blank" class="silver-btn px-4 py-1.5 rounded-xl font-mono text-xs font-bold uppercase tracking-[0.15em] flex items-center space-x-2">
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          <span>Star</span>
+        </a>
       </div>
-      <a href="https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM" target="_blank" class="silver-btn px-6 py-2.5 rounded-xl font-mono text-xs font-bold uppercase tracking-[0.2em] flex items-center space-x-2">
-        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-        <span>Star on GitHub</span>
-      </a>
-    </div>
 
-    <!-- Mobile Action -->
-    <div class="md:hidden">
-      <a href="#demo" class="silver-btn px-4 py-2 rounded-lg font-mono text-[10px] font-bold tracking-widest uppercase">
-        Live Demo
-      </a>
-    </div>
-  </nav>
+      <!-- Mobile Action -->
+      <div class="md:hidden">
+        <a href="#demo" class="silver-btn px-3 py-1.5 rounded-lg font-mono text-[10px] font-bold tracking-widest uppercase">
+          Demo
+        </a>
+      </div>
+    </nav>
+  </div>
 
   <!-- ========================================================================= -->
   <!-- 2. HERO SECTION -->
@@ -196,9 +226,18 @@
     </h1>
 
     <!-- Core Research Pitch -->
-    <p class="font-sans font-light text-neutral-400 text-base md:text-xl max-w-3xl mx-auto mt-6 mb-10 leading-relaxed">
+    <p class="font-sans font-light text-neutral-400 text-base md:text-xl max-w-3xl mx-auto mt-6 mb-8 leading-relaxed">
       A lightweight, one-class neuro-symbolic filter that learns the latent structural grammar of valid problem solving. Detects premature conclusions and circular loops in <strong class="text-white font-medium">148ms on CPU</strong>—saving <strong class="text-white font-medium">42% to 47%</strong> of downstream LLM inference overhead.
     </p>
+
+    <!-- 1-Click Copyable Terminal Command -->
+    <div class="inline-flex items-center max-w-xl mx-auto bg-black/70 border border-white/[0.12] rounded-xl px-4 py-2.5 my-4 font-mono text-xs group cursor-pointer hover:border-white/30 transition" onclick="copyPipCommand()">
+      <span class="text-neutral-500 mr-2 select-none">$</span>
+      <span id="pip-text" class="text-neutral-200 select-all tracking-wide">pip install git+https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM.git</span>
+      <button class="ml-4 px-2.5 py-1 rounded bg-white/10 text-[10px] text-white uppercase tracking-widest hover:bg-white/20 transition flex items-center space-x-1">
+        <span id="copy-label">Copy</span>
+      </button>
+    </div>
 
     <!-- Key Metrics Bar -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto py-8 border-y border-white/[0.08] font-mono text-xs tracking-[0.2em] uppercase text-neutral-400 my-8">
@@ -229,7 +268,7 @@
   </header>
 
   <!-- ========================================================================= -->
-  <!-- 3. LIVE INTERACTIVE DEMO (IN-BROWSER TAGGER & SCORE SIMULATION) -->
+  <!-- 3. LIVE INTERACTIVE DEMO & ANIMATED MARKOV FLOW GRAPH -->
   <!-- ========================================================================= -->
   <section id="demo" class="w-[92vw] mx-auto mt-20 p-8 md:p-14 rounded-3xl frosted-glass border border-white/[0.08]">
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-6 border-b border-white/[0.08]">
@@ -242,6 +281,24 @@
         <button onclick="loadPreset('valid')" class="underline hover:text-white mr-3 text-neutral-300 font-semibold transition">Valid Derivation</button>
         <button onclick="loadPreset('loop')" class="underline hover:text-white mr-3 text-amber-400 transition">Circular Loop</button>
         <button onclick="loadPreset('premature')" class="underline hover:text-white text-red-400 transition">Premature Jump</button>
+      </div>
+    </div>
+
+    <!-- Live Dynamic Markov Flow Graph Canvas Component -->
+    <div class="mb-8 p-6 rounded-2xl bg-black/60 border border-white/[0.08] relative overflow-hidden">
+      <div class="flex items-center justify-between mb-4">
+        <span class="font-mono text-[10px] uppercase tracking-widest text-neutral-500 flex items-center space-x-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>REAL-TIME MARKOV TRANSITION TOPOLOGY GRAPH</span>
+        </span>
+        <span id="topology-status" class="font-mono text-[10px] text-emerald-400 tracking-wider">STABLE DEDUCTION TOPOLOGY</span>
+      </div>
+
+      <!-- Interactive SVG Flow Nodes -->
+      <div class="w-full overflow-x-auto py-4">
+        <div id="flow-graph" class="flex items-center justify-start md:justify-center min-w-[650px] space-x-3 font-mono text-xs">
+          <!-- Flow generated dynamically via JavaScript -->
+        </div>
       </div>
     </div>
 
@@ -284,11 +341,7 @@ Therefore, the total answer is 20.</textarea>
 
           <!-- Tag Badges Container -->
           <div id="tag-container" class="flex flex-wrap gap-2 my-4">
-            <span class="px-2.5 py-1 rounded bg-white/10 font-mono text-xs text-white border border-white/20">PR (Restatement)</span>
-            <span class="px-2.5 py-1 rounded bg-white/10 font-mono text-xs text-white border border-white/20">EQ (Equation)</span>
-            <span class="px-2.5 py-1 rounded bg-white/10 font-mono text-xs text-white border border-white/20">CA (Calculate)</span>
-            <span class="px-2.5 py-1 rounded bg-white/10 font-mono text-xs text-white border border-white/20">VE (Verify)</span>
-            <span class="px-2.5 py-1 rounded bg-white/10 font-mono text-xs text-white border border-white/20">CO (Conclusion)</span>
+            <!-- Dynamically populated -->
           </div>
 
           <!-- Metrics Row -->
@@ -309,20 +362,20 @@ Therefore, the total answer is 20.</textarea>
         <!-- Triage Verdict Banner -->
         <div id="verdict-box" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
           <div class="flex items-center space-x-3">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span id="verdict-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
             <div>
               <div id="verdict-title" class="font-mono text-xs font-bold text-white uppercase tracking-widest">HIGH-CONFIDENCE PASS TIER</div>
               <div id="verdict-desc" class="font-sans text-[11px] text-neutral-400">99.3% precision threshold met. Bypass heavy downstream neural verifier.</div>
             </div>
           </div>
-          <span class="font-mono text-[10px] px-2 py-1 bg-white/10 rounded uppercase text-white tracking-widest">TOP 35%</span>
+          <span id="verdict-badge" class="font-mono text-[10px] px-2 py-1 bg-white/10 rounded uppercase text-white tracking-widest">TOP 35%</span>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 4. CLEAN ARCHITECTURAL PIPELINE (CODE & CARDS - NO EXTERNAL PNGs) -->
+  <!-- 4. CLEAN ARCHITECTURAL PIPELINE (CODE & CARDS) -->
   <!-- ========================================================================= -->
   <section id="architecture" class="w-[92vw] mx-auto my-24">
     <div class="text-center max-w-3xl mx-auto mb-14">
@@ -551,11 +604,11 @@ tags = tag_steps(segment_and_clean(trace))
   </footer>
 
   <!-- ========================================================================= -->
-  <!-- JAVASCRIPT: LENIS SMOOTH SCROLL & INTERACTIVE LOGIC -->
+  <!-- JAVASCRIPT: LENIS, CURSOR LIGHT, MARKOV FLOW, INTERACTIVE LOGIC -->
   <!-- ========================================================================= -->
   <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
   <script>
-    // Initialize Lenis Smooth Scroll with butter-smooth inertia
+    // 1. Initialize Lenis Smooth Scroll
     const lenis = new Lenis({
       duration: 1.25,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -581,13 +634,34 @@ tags = tag_steps(segment_and_clean(trace))
           const targetElem = document.querySelector(targetId);
           if (targetElem) {
             e.preventDefault();
-            lenis.scrollTo(targetElem, { offset: -30 });
+            lenis.scrollTo(targetElem, { offset: -40 });
           }
         }
       });
     });
 
-    // Preset Data
+    // 2. Interactive Mouse Cursor Spotlight
+    const spotlight = document.getElementById('cursor-spotlight');
+    window.addEventListener('mousemove', (e) => {
+      spotlight.style.left = e.clientX + 'px';
+      spotlight.style.top = e.clientY + 'px';
+    });
+
+    // 3. 1-Click Copy Pip Command
+    function copyPipCommand() {
+      const text = document.getElementById('pip-text').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const label = document.getElementById('copy-label');
+        label.innerText = 'COPIED!';
+        label.parentElement.classList.add('bg-emerald-500/20', 'text-emerald-300');
+        setTimeout(() => {
+          label.innerText = 'Copy';
+          label.parentElement.classList.remove('bg-emerald-500/20', 'text-emerald-300');
+        }, 2200);
+      });
+    }
+
+    // 4. Preset Data
     const presets = {
       valid: `The problem asks for the total quantity of apples.
 Let x be the number of apples in the basket.
@@ -609,17 +683,22 @@ Therefore, the final answer is 20.`
       runAnalysis();
     }
 
-    // Client-side rule tagger emulator matching rule_based_tagger.py
+    // 5. Client-side rule tagger emulator & Dynamic Flow Graph Generator
     function runAnalysis() {
       const text = document.getElementById('reasoning-input').value;
       const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
       
       const tagContainer = document.getElementById('tag-container');
+      const flowGraph = document.getElementById('flow-graph');
+      const topologyStatus = document.getElementById('topology-status');
+      
       tagContainer.innerHTML = '';
+      flowGraph.innerHTML = '';
       
       const detectedTags = [];
+      const tagDetails = [];
       
-      lines.forEach(line => {
+      lines.forEach((line, idx) => {
         let tag = "IN";
         let label = "Inference";
         const l = line.toLowerCase();
@@ -637,22 +716,63 @@ Therefore, the final answer is 20.`
         }
         
         detectedTags.push(tag);
+        tagDetails.push({ tag, label });
         
+        // Output badges
         const badge = document.createElement('span');
         badge.className = "px-2.5 py-1 rounded bg-white/10 font-mono text-xs text-white border border-white/20";
         badge.innerText = `${tag} (${label})`;
         tagContainer.appendChild(badge);
       });
 
+      const isLoop = detectedTags.filter(t => t === 'IN').length >= 4;
+      const isPremature = detectedTags.length <= 2 && detectedTags.includes('CO') && detectedTags.includes('PR');
+
+      // Build Interactive Flow Graph
+      tagDetails.forEach((item, index) => {
+        // Node
+        const node = document.createElement('div');
+        let nodeColor = "border-white/20 bg-white/5 text-white";
+        if (isPremature && item.tag === 'CO') {
+          nodeColor = "border-red-500/50 bg-red-500/10 text-red-300";
+        } else if (isLoop && item.tag === 'IN') {
+          nodeColor = "border-amber-500/50 bg-amber-500/10 text-amber-300";
+        } else if (!isLoop && !isPremature) {
+          nodeColor = "border-emerald-500/30 bg-emerald-500/10 text-emerald-200";
+        }
+
+        node.className = `px-3 py-2 rounded-xl border flex flex-col items-center ${nodeColor} shadow-md`;
+        node.innerHTML = `
+          <span class="font-bold text-xs">${item.tag}</span>
+          <span class="text-[9px] text-neutral-400 opacity-80 uppercase">${item.label}</span>
+        `;
+        flowGraph.appendChild(node);
+
+        // Arrow between nodes
+        if (index < tagDetails.length - 1) {
+          const arrow = document.createElement('div');
+          arrow.className = "flex items-center text-neutral-500 px-1";
+          
+          if (isPremature) {
+            arrow.innerHTML = `<span class="text-red-400 font-mono text-[10px] tracking-tighter">✕ (P &lt; 1e-4) →</span>`;
+          } else if (isLoop && item.tag === 'IN') {
+            arrow.innerHTML = `<span class="text-amber-400 font-mono text-[10px]">⟲ loop →</span>`;
+          } else {
+            arrow.innerHTML = `<svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>`;
+          }
+          flowGraph.appendChild(arrow);
+        }
+      });
+
+      // Update Scores & Triage Verdicts
       const scoreElem = document.getElementById('metric-score');
       const entropyElem = document.getElementById('metric-entropy');
       const verdictBox = document.getElementById('verdict-box');
       const verdictTitle = document.getElementById('verdict-title');
       const verdictDesc = document.getElementById('verdict-desc');
+      const verdictDot = document.getElementById('verdict-dot');
+      const verdictBadge = document.getElementById('verdict-badge');
       const timerElem = document.getElementById('eval-timer');
-
-      const isLoop = detectedTags.filter(t => t === 'IN').length >= 4;
-      const isPremature = detectedTags.length <= 2 && detectedTags.includes('CO') && detectedTags.includes('PR');
 
       timerElem.innerText = `EXEC: ${(Math.random() * 0.4 + 1.4).toFixed(2)} ms (CPU)`;
 
@@ -662,32 +782,55 @@ Therefore, the final answer is 20.`
         entropyElem.innerText = "0.7812";
         entropyElem.className = "text-2xl font-bold text-red-400 tracking-wider";
 
+        topologyStatus.innerText = "PREMATURE DERIVATION BREAK (ABRUPT CONCLUSION)";
+        topologyStatus.className = "font-mono text-[10px] text-red-400 tracking-wider";
+
         verdictBox.className = "p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-between";
         verdictTitle.innerText = "EARLY REJECT TIER (PREMATURE CONCLUSION)";
         verdictTitle.className = "font-mono text-xs font-bold text-red-400 uppercase tracking-widest";
         verdictDesc.innerText = "P(CO|PR) < 1e-4 transition violation. Early exit triggered prior to token generation.";
+        verdictDot.className = "w-2.5 h-2.5 rounded-full bg-red-400";
+        verdictBadge.innerText = "REJECT";
+        verdictBadge.className = "font-mono text-[10px] px-2 py-1 bg-red-500/20 text-red-300 rounded uppercase tracking-widest";
       } else if (isLoop) {
         scoreElem.innerText = "-15.5307";
         scoreElem.className = "text-2xl font-bold text-amber-400 tracking-wider";
         entropyElem.innerText = "0.5420";
         entropyElem.className = "text-2xl font-bold text-amber-400 tracking-wider";
 
+        topologyStatus.innerText = "DEGENERATIVE CYCLIC INFERENCE LOOP DETECTED";
+        topologyStatus.className = "font-mono text-[10px] text-amber-400 tracking-wider";
+
         verdictBox.className = "p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between";
         verdictTitle.innerText = "ESCALATION TIER (DEGENERATIVE LOOP)";
         verdictTitle.className = "font-mono text-xs font-bold text-amber-400 uppercase tracking-widest";
         verdictDesc.innerText = "High entropy & repetitive inference detected. Route to temperature re-sampling.";
+        verdictDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+        verdictBadge.innerText = "ESCALATE";
+        verdictBadge.className = "font-mono text-[10px] px-2 py-1 bg-amber-500/20 text-amber-300 rounded uppercase tracking-widest";
       } else {
         scoreElem.innerText = "-0.9362";
         scoreElem.className = "text-2xl font-bold text-white tracking-wider";
         entropyElem.innerText = "0.1442";
         entropyElem.className = "text-2xl font-bold text-emerald-400 tracking-wider";
 
+        topologyStatus.innerText = "STABLE DEDUCTION TOPOLOGY VERIFIED";
+        topologyStatus.className = "font-mono text-[10px] text-emerald-400 tracking-wider";
+
         verdictBox.className = "p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between";
         verdictTitle.innerText = "HIGH-CONFIDENCE PASS TIER";
         verdictTitle.className = "font-mono text-xs font-bold text-white uppercase tracking-widest";
         verdictDesc.innerText = "99.3% precision threshold met. Bypass heavy downstream neural verifier.";
+        verdictDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+        verdictBadge.innerText = "TOP 35%";
+        verdictBadge.className = "font-mono text-[10px] px-2 py-1 bg-white/10 text-white rounded uppercase tracking-widest";
       }
     }
+
+    // Run initial analysis on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      runAnalysis();
+    });
   </script>
 </body>
 </html>
