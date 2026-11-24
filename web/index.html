@@ -79,11 +79,6 @@
       transform: translateY(-1px);
     }
 
-    /* Code Block Formatting */
-    pre code {
-      font-family: 'Geist Mono', monospace;
-    }
-
     /* Subtle grid line accents */
     .grid-lines {
       background-size: 40px 40px;
@@ -110,8 +105,8 @@
     <!-- Desktop Navigation Links -->
     <div class="hidden md:flex items-center space-x-2">
       <div class="flex items-center rounded-xl bg-white/[0.03] border border-white/[0.08] p-1 space-x-1 text-xs font-mono tracking-wider uppercase">
-        <a href="#pipeline" class="px-4 py-2 hover:text-white transition text-neutral-400">Architecture</a>
         <a href="#demo" class="px-4 py-2 hover:text-white transition text-neutral-400">Interactive Demo</a>
+        <a href="#architecture" class="px-4 py-2 hover:text-white transition text-neutral-400">Architecture</a>
         <a href="#benchmarks" class="px-4 py-2 hover:text-white transition text-neutral-400">Benchmarks</a>
         <a href="#reproducibility" class="px-4 py-2 hover:text-white transition text-neutral-400">Python SDK</a>
       </div>
@@ -273,57 +268,73 @@ Therefore, the total answer is 20.</textarea>
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 4. VISUAL PIPELINE & ARCHITECTURE -->
+  <!-- 4. CLEAN ARCHITECTURAL PIPELINE (CODE & CARDS - NO EXTERNAL PNGs) -->
   <!-- ========================================================================= -->
-  <section id="pipeline" class="w-[92vw] mx-auto my-20">
-    <div class="text-center max-w-3xl mx-auto mb-12">
-      <span class="font-mono text-[10px] uppercase tracking-[0.4em] text-neutral-500">TECHNICAL METHODOLOGY</span>
+  <section id="architecture" class="w-[92vw] mx-auto my-20">
+    <div class="text-center max-w-3xl mx-auto mb-14">
+      <span class="font-mono text-[10px] uppercase tracking-[0.4em] text-neutral-500">METHODOLOGICAL BLUEPRINT</span>
       <h2 class="font-serif italic text-4xl md:text-6xl text-white mt-2">
-        How CoT-HMM Evaluates Reasoning
+        The 3-Stage Neuro-Symbolic Engine
       </h2>
       <p class="font-sans text-neutral-400 text-sm mt-4">
-        Unlike neural Process Reward Models (PRMs) that require token-level training, CoT-HMM separates structural discourse from arithmetic truth through discrete sequential abstraction.
+        Eliminating heavy neural verifiers by modeling reasoning syntax as a discrete Markovian sequence.
       </p>
     </div>
 
-    <!-- Pipeline Diagram Preview -->
-    <div class="frosted-glass rounded-3xl p-6 md:p-10 border border-white/[0.08] mb-12">
-      <img src="fig_pipeline.png" alt="CoT-HMM Evaluation Pipeline Architecture" class="w-full h-auto rounded-xl border border-white/[0.08] bg-black/40">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 font-mono text-xs">
-        <div class="p-4 border border-white/[0.06] rounded-xl bg-white/[0.01]">
-          <span class="text-white font-bold block mb-1">1. Regex Token Abstraction</span>
-          <span class="text-neutral-400 text-[11px]">Maps sentences to 8 semantic tags (PR, IN, CA, EQ, CO, RF, VE, DV) in &lt;18ms with κ = 0.953 human agreement.</span>
+    <!-- 3-Stage Native Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      
+      <!-- Stage 1 -->
+      <div class="frosted-glass rounded-3xl p-8 border border-white/[0.08] flex flex-col justify-between">
+        <div>
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-6">STAGE 01 // SYNTACTIC ABSTRACTION</div>
+          <h3 class="font-serif italic text-3xl text-white mb-3">8-Tag Grammar</h3>
+          <p class="font-mono text-xs text-neutral-400 leading-relaxed mb-6">
+            Prioritized deterministic regex decouples surface lexical realization from reasoning topology in &lt;18ms.
+          </p>
         </div>
-        <div class="p-4 border border-white/[0.06] rounded-xl bg-white/[0.01]">
-          <span class="text-white font-bold block mb-1">2. Multi-Resolution Ensemble</span>
-          <span class="text-neutral-400 text-[11px]">M = 12 HMMs across latent complexities K ∈ {3, 5, 8, 12} trained exclusively on verified correct chains.</span>
+        <div class="p-4 rounded-xl bg-black/60 border border-white/[0.06] font-mono text-[11px] space-y-1.5 text-neutral-300">
+          <div class="flex justify-between"><span class="text-white font-bold">PR → Restatement</span><span class="text-neutral-500">Setup</span></div>
+          <div class="flex justify-between"><span class="text-white font-bold">EQ → Equation</span><span class="text-neutral-500">Hypothesis</span></div>
+          <div class="flex justify-between"><span class="text-white font-bold">CA → Calculation</span><span class="text-neutral-500">Operation</span></div>
+          <div class="flex justify-between"><span class="text-white font-bold">CO → Conclusion</span><span class="text-neutral-500">Terminal</span></div>
         </div>
-        <div class="p-4 border border-white/[0.06] rounded-xl bg-white/[0.01]">
-          <span class="text-white font-bold block mb-1">3. 3-Tier Compute Gate</span>
-          <span class="text-neutral-400 text-[11px]">High-confidence pass (99.3% precision), middle tier re-sampling, early reject prior to token generation.</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Additional Visual Artifacts: Transition Grammar & Manifold -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div class="frosted-glass rounded-3xl p-6 md:p-8 border border-white/[0.08]">
-        <span class="font-mono text-[10px] uppercase tracking-widest text-neutral-500 block mb-2">EMPIRICAL PROOF</span>
-        <h3 class="font-serif italic text-2xl text-white mb-4">Learned Transition Dynamics</h3>
-        <img src="fig_transition.png" alt="Transition Probability Matrix Comparison" class="w-full h-auto rounded-xl border border-white/[0.08] bg-black/40 mb-4">
-        <p class="font-mono text-[11px] text-neutral-400 leading-relaxed">
-          Correct derivations exhibit predictable PR → EQ → CA → CO flow. Structurally corrupted chains exhibit chaotic transitions and recursive self-loops.
-        </p>
       </div>
 
-      <div class="frosted-glass rounded-3xl p-6 md:p-8 border border-white/[0.08]">
-        <span class="font-mono text-[10px] uppercase tracking-widest text-neutral-500 block mb-2">t-SNE PROJECTION</span>
-        <h3 class="font-serif italic text-2xl text-white mb-4">The Reasoning Manifold</h3>
-        <img src="reasoning_manifold.png" alt="t-SNE Reasoning Manifold" class="w-full h-auto rounded-xl border border-white/[0.08] bg-black/40 mb-4">
-        <p class="font-mono text-[11px] text-neutral-400 leading-relaxed">
-          Mathematically sound reasoning chains cluster tightly into a cohesive, low-variance structural manifold, distinctly separated from erratic reasoning trajectories.
-        </p>
+      <!-- Stage 2 -->
+      <div class="frosted-glass rounded-3xl p-8 border border-white/[0.08] flex flex-col justify-between">
+        <div>
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-6">STAGE 02 // PROBABILISTIC MODELING</div>
+          <h3 class="font-serif italic text-3xl text-white mb-3">M=12 Ensemble</h3>
+          <p class="font-mono text-xs text-neutral-400 leading-relaxed mb-6">
+            Multi-resolution Hidden Markov Models across state complexities K ∈ {3, 5, 8, 12} trained solely on verified positive traces.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-black/60 border border-white/[0.06] font-mono text-[11px] space-y-1.5 text-neutral-300">
+          <div class="flex justify-between"><span>Training Data:</span><span class="text-emerald-400 font-bold">One-Class (Positive only)</span></div>
+          <div class="flex justify-between"><span>Optimization:</span><span class="text-white">Baum-Welch EM</span></div>
+          <div class="flex justify-between"><span>Scoring Algorithm:</span><span class="text-white">Forward α_t(j) Recursion</span></div>
+          <div class="flex justify-between"><span>Normalization:</span><span class="text-white">1/T (Zero length bias)</span></div>
+        </div>
       </div>
+
+      <!-- Stage 3 -->
+      <div class="frosted-glass rounded-3xl p-8 border border-white/[0.08] flex flex-col justify-between">
+        <div>
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500 mb-6">STAGE 03 // ADAPTIVE DECISION</div>
+          <h3 class="font-serif italic text-3xl text-white mb-3">3-Tier Routing Gate</h3>
+          <p class="font-mono text-xs text-neutral-400 leading-relaxed mb-6">
+            Triages reasoning chains into fast pass, secondary escalation, or early abort prior to full token generation.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-black/60 border border-white/[0.06] font-mono text-[11px] space-y-1.5 text-neutral-300">
+          <div class="flex justify-between"><span class="text-emerald-400 font-bold">Top 35% (Pass):</span><span class="text-white">99.3% Precision</span></div>
+          <div class="flex justify-between"><span class="text-amber-400 font-bold">Middle 35% (Retry):</span><span class="text-neutral-400">Re-sample</span></div>
+          <div class="flex justify-between"><span class="text-red-400 font-bold">Bottom 30% (Reject):</span><span class="text-neutral-400">93.1% Error Rate</span></div>
+          <div class="flex justify-between border-t border-white/[0.06] pt-1"><span>Token Savings:</span><span class="text-white font-bold">42% - 47%</span></div>
+        </div>
+      </div>
+
     </div>
   </section>
 
