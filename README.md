@@ -50,7 +50,7 @@ Trained *exclusively* on positive traces from Qwen2.5-0.5B, the learned structur
 ## 🚀 Quickstart: Install & Use in 3 Lines
 
 ```bash
-pip install git+https://github.com/GauravPatil2515/Chain-Of-Taughts-HMM.git
+pip install git+https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM.git
 ```
 
 ```python

@@ -39,6 +39,6 @@ mcp = ["mcp>=2,<3"]
 packages = {find = {include = ["cot_hmm*", "src*"]}}
 
 [project.urls]
-"Homepage" = "https://github.com/GauravPatil2515/Chain-Of-Taughts-HMM"
-"Paper" = "https://github.com/GauravPatil2515/Chain-Of-Taughts-HMM/blob/main/camera_ready/IDCIoT_154_CameraReady.pdf"
-"Bug Tracker" = "https://github.com/GauravPatil2515/Chain-Of-Taughts-HMM/issues"
+"Homepage" = "https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM"
+"Paper" = "https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM/blob/main/camera_ready/IDCIoT_154_CameraReady.pdf"
+"Bug Tracker" = "https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM/issues"

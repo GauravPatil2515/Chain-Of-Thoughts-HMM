@@ -288,8 +288,8 @@ def get_cot_hmm_specs() -> Dict[str, Any]:
             "routing_pass_precision": "99.3%",
             "downstream_compute_token_savings": "42% to 47%"
         },
-        "repository": "https://github.com/GauravPatil2515/Chain-Of-Taughts-HMM",
-        "docs": "https://gauravpatil2515.github.io/Chain-Of-Taughts-HMM/"
+        "repository": "https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM",
+        "docs": "https://gauravpatil2515.github.io/Chain-Of-Thoughts-HMM/"
     }
 
 
