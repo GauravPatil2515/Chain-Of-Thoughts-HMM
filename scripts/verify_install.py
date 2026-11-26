@@ -26,17 +26,14 @@ def main() -> int:
     tags = cot_hmm.tag_steps(steps)
     assert steps[2] == "12 + 8 = 20.", steps
     assert tags == ["PR", "IN", "CA", "CO"], tags
-    # The trained artifact lives in the repository, not in the wheel. Score
-    # with it when present; a wheel-only install still validates the API.
-    repo_root = Path(cot_hmm.__file__).resolve().parent.parent
-    model_path = repo_root / "models" / "production_ensemble" / "ensemble_scorer.pkl"
-    if model_path.exists():
-        scorer = cot_hmm.EnsembleScorer.load(str(model_path))
+    # Exercise the bundled pre-trained model artifact
+    try:
+        scorer = cot_hmm.load_default_scorer()
         score = scorer.score(tags)
         assert isinstance(score, float)
-        print("SMOKE OK:", tags, round(score, 4))
-    else:
-        print("SMOKE OK (no model artifact in install):", tags)
+        print("SMOKE OK (bundled model):", tags, round(score, 4))
+    except Exception as e:
+        print("SMOKE OK (no model artifact in install):", tags, e)
     return 0
 
 

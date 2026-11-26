@@ -78,6 +78,7 @@ Thumbs.db
 *.pkl
 *.joblib
 models/*.pkl
+!cot_hmm/models/*.pkl
 models/*.analysis.json
 
 # Large data files (keep structure, ignore contents)

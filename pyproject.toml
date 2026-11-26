@@ -38,6 +38,9 @@ mcp = ["mcp>=2,<3"]
 # cot_hmm re-exports from src; both packages must ship for `pip install` to work.
 packages = {find = {include = ["cot_hmm*", "src*"]}}
 
+[tool.setuptools.package-data]
+cot_hmm = ["models/*.pkl"]
+
 [project.urls]
 "Homepage" = "https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM"
 "Paper" = "https://github.com/GauravPatil2515/Chain-Of-Thoughts-HMM/blob/main/camera_ready/IDCIoT_154_CameraReady.pdf"

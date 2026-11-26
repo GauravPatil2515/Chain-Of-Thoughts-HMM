@@ -37,9 +37,6 @@ TAG_DEFINITIONS = {
     "DV": "Diversion: Off-topic tangent, redundant filler, or irrelevant discourse",
 }
 
-# Path to trained ensemble model
-MODEL_PATH = PROJECT_ROOT / "models" / "production_ensemble" / "ensemble_scorer.pkl"
-
 # Singleton model loader
 _CACHED_SCORER: Optional[EnsembleScorer] = None
 
@@ -48,26 +45,8 @@ def get_scorer() -> EnsembleScorer:
     global _CACHED_SCORER
     if _CACHED_SCORER is not None:
         return _CACHED_SCORER
-
-    if MODEL_PATH.exists():
-        _CACHED_SCORER = EnsembleScorer.load(str(MODEL_PATH))
-    else:
-        # Fallback to training on balanced data if pre-saved model is missing
-        from cot_hmm import EnsembleHMMTrainer
-        import json
-        data_path = PROJECT_ROOT / "data" / "v2" / "gsm8k_500_proper.json"
-        if data_path.exists():
-            with open(data_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            sequences = [d["tag_sequence"] for d in data if d.get("is_correct", False) and len(d.get("tag_sequence", [])) >= 2]
-            trainer = EnsembleHMMTrainer(n_components=5, n_ensemble=12, n_iter=50, random_state=42)
-            trainer.fit(sequences)
-            MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
-            scorer = EnsembleScorer(trainer.ensemble)
-            scorer.save(str(MODEL_PATH))
-            _CACHED_SCORER = scorer
-        else:
-            raise FileNotFoundError(f"Model file not found at {MODEL_PATH} and training data missing at {data_path}")
+    from cot_hmm import load_default_scorer
+    _CACHED_SCORER = load_default_scorer()
     return _CACHED_SCORER
 
 
