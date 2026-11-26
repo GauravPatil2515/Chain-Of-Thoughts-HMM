@@ -89,26 +89,6 @@ def generate_synthetic_gsm8k_data():
             pattern.pop(idx)
         return pattern
 
-    # Generate samples
-    for i in range(500):
-        is_correct = i % 2 == 0  # Alternate for balance
-        
-        if is_correct:
-            base_pattern = random.choice(correct_base_patterns)
-            tag_seq = add_noise_to_pattern(base_pattern, noise_prob=0.25)
-            # Correct samples get better scores
-            score = np.random.normal(-1.5, 0.4)
-        else:
-            base_pattern = random.choice(incorrect_base_patterns)
-            tag_seq = add_noise_to_pattern(base_pattern, noise_prob=0.25)
-            # Incorrect samples get worse scores
-            score = np.random.normal(-3.5, 0.5)
-        
-        # Ensure minimum length
-        if len(tag_seq) < 2:
-            tag_seq = ['PR', 'CO'] if is_correct else ['PR', 'DV', 'CO']
-        
-# Generate simple CoT text that matches tagger patterns
     # Map tags to realistic text patterns that the tagger can recognize
     tag_to_text = {
         'PR': 'First, I need to understand the problem. We are given some numbers to work with.',
@@ -119,17 +99,36 @@ def generate_synthetic_gsm8k_data():
         'DV': 'By the way, this reminds me of a similar problem. Off topic, but interesting.',
         'CO': 'The final answer is 17. So the result is 17 dollars.'
     }
-    
-    # Generate CoT text by mapping each tag to its text pattern
-    cot_parts = []
-    for tag in tag_seq:
-        if tag in tag_to_text:
-            cot_parts.append(tag_to_text[tag])
+
+    # Generate samples
+    for i in range(500):
+        is_correct = i % 2 == 0  # Alternate for balance
+
+        if is_correct:
+            base_pattern = random.choice(correct_base_patterns)
+            tag_seq = add_noise_to_pattern(base_pattern, noise_prob=0.25)
+            # Correct samples get better scores
+            score = np.random.normal(-1.5, 0.4)
         else:
-            cot_parts.append(f'Processing {tag}')
-    
-    cot_text = ' '.join(cot_parts)
-        
+            base_pattern = random.choice(incorrect_base_patterns)
+            tag_seq = add_noise_to_pattern(base_pattern, noise_prob=0.25)
+            # Incorrect samples get worse scores
+            score = np.random.normal(-3.5, 0.5)
+
+        # Ensure minimum length
+        if len(tag_seq) < 2:
+            tag_seq = ['PR', 'CO'] if is_correct else ['PR', 'DV', 'CO']
+
+        # Generate CoT text by mapping each tag to its text pattern
+        cot_parts = []
+        for tag in tag_seq:
+            if tag in tag_to_text:
+                cot_parts.append(tag_to_text[tag])
+            else:
+                cot_parts.append(f'Processing {tag}')
+
+        cot_text = ' '.join(cot_parts)
+
         data.append({
             'sample_id': f'gsm_{i:04d}',
             'problem': f'Problem {i}: Calculate something',

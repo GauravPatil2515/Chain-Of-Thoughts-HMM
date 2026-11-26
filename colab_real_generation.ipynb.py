@@ -8,8 +8,10 @@
 #
 # This generates ~300 REAL CoT traces from ACTUAL GSM8K questions using Qwen-0.5B
 
-# @title 1. Install Dependencies
-!pip install -q transformers accelerate datasets hmmlearn scikit-learn scipy tqdm
+# @title 1. Install Dependencies (notebook use only)
+# Uncomment the next line in Colab/Kaggle; local users should run:
+#   pip install -r requirements.txt
+# !pip install -q transformers accelerate datasets hmmlearn scikit-learn scipy tqdm
 
 # @title 2. Import Libraries
 import os
