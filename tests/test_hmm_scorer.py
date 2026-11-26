@@ -125,6 +125,27 @@ class TestEnsembleScorer:
         assert original_score == loaded_score
 
 
+    def test_model_failure_is_logged(self, mock_ensemble, caplog):
+        """A broken model must not be silently dropped from the ensemble."""
+        import logging
+
+        scorer = EnsembleScorer(mock_ensemble + [object()])
+        with caplog.at_level(logging.WARNING, logger="hmm.scorer"):
+            score = scorer.score(["PR", "IN", "CA", "CO"])
+        assert isinstance(score, float)
+        assert "HMM model 2 failed to score sequence" in caplog.text
+
+    def test_all_models_failing_returns_neg_inf(self, caplog):
+        """Total scoring failure must be observable and return -inf."""
+        import logging
+
+        scorer = EnsembleScorer([object(), object()])
+        with caplog.at_level(logging.ERROR, logger="hmm.scorer"):
+            score = scorer.score(["PR", "CO"])
+        assert score == float('-inf')
+        assert "All 2 HMM models failed" in caplog.text
+
+
 class TestEnsembleConsistency:
     """Tests for ensemble consistency properties."""
 

@@ -5,11 +5,14 @@ Score CoT sequences using trained HMM model.
 
 import json
 import argparse
+import logging
 import numpy as np
 import joblib
 from pathlib import Path
 from typing import List, Dict, Union
 from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
 
 # Tag vocabulary (must match trainer.py)
 TAGS = ["PR", "DV", "EQ", "CA", "IN", "RF", "VE", "CO"]
@@ -255,7 +258,7 @@ class EnsembleScorer:
             return float('-inf')
             
         scores = []
-        for model in self.models:
+        for idx, model in enumerate(self.models):
             try:
                 # Convert tag sequence to integers using the mapping
                 encoded = [TAG_TO_ID.get(tag, TAG_TO_ID["IN"]) for tag in tag_sequence]
@@ -263,10 +266,13 @@ class EnsembleScorer:
                 ll = model.score(X)
                 # length normalization
                 scores.append(ll / len(tag_sequence))
-            except Exception:
-                pass
-                
+            except Exception as exc:
+                # Never swallow a model failure silently: a partially scored
+                # ensemble must be observable in logs.
+                logger.warning("HMM model %d failed to score sequence: %s", idx, exc)
+
         if not scores:
+            logger.error("All %d HMM models failed to score sequence", len(self.models))
             return float('-inf')
             
         return float(np.mean(scores))
