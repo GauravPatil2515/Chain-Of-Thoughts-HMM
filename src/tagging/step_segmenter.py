@@ -71,9 +71,17 @@ def segment_cot(text: str, method: str = "auto") -> List[str]:
 
 
 def clean_step(step: str) -> str:
-    """Clean and normalize a step string."""
-    # Remove leading Step numbers or numbers/bullets
-    step = re.sub(r'^(?:Step\s+\d+[:\.]\s*|[\d\-\*•]+[.):\s]*)', '', step, flags=re.IGNORECASE)
+    """Clean and normalize a step string.
+
+    Only strip explicit step markers. A bare leading number (or negative sign)
+    is meaningful content in arithmetic and must never be removed.
+    """
+    step = re.sub(
+        r"^(?:Step\s+\d+[.:]\s*|\d+[.)]\s+|\d+:\s+|[-*•]\s+)",
+        "",
+        step,
+        flags=re.IGNORECASE,
+    )
     # Remove extra whitespace
     step = ' '.join(step.split())
     return step.strip()

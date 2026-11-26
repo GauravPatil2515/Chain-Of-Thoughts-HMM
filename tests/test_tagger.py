@@ -34,6 +34,29 @@ class TestStepSegmenter:
         steps = segment_and_clean(text)
         assert len(steps) == 3
 
+    def test_clean_step_preserves_meaningful_leading_numbers(self):
+        """Arithmetic operands and years must survive cleaning."""
+        from src.tagging.step_segmenter import clean_step
+
+        assert clean_step("12 + 8 = 20 apples remain.") == "12 + 8 = 20 apples remain."
+        assert clean_step("2024 was the year.") == "2024 was the year."
+        assert clean_step("3x + 5 = 20 solve for x.") == "3x + 5 = 20 solve for x."
+        assert clean_step("-5 + 3 = -2.") == "-5 + 3 = -2."
+
+    def test_clean_step_still_removes_step_markers(self):
+        """Explicit step markers must still be stripped."""
+        from src.tagging.step_segmenter import clean_step
+
+        assert clean_step("Step 1: Calculate 4 times 3.") == "Calculate 4 times 3."
+        assert clean_step("1. Add 5 and 7.") == "Add 5 and 7."
+        assert clean_step("2) Verify the result.") == "Verify the result."
+
+    def test_segment_and_clean_keeps_arithmetic_operand(self):
+        """End-to-end: an arithmetic step keeps its first operand."""
+        text = "The problem asks for apples.\nLet x be apples.\n12 + 8 = 20.\nTherefore answer is 20."
+        steps = segment_and_clean(text)
+        assert steps[2] == "12 + 8 = 20."
+
 
 class TestRuleBasedTagger:
     """Tests for rule-based tagging logic."""
