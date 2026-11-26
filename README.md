@@ -37,6 +37,8 @@ Large reasoning models (DeepSeek-R1, OpenAI o1/o3-mini, Qwen-QWQ) burn tokens ge
 | **Inference Hardware & Latency** | **$148 \pm 12$\,ms (CPU)** | PRM: $>2{,}500$\,ms (GPU) | **$>16\times$ Faster, 0 GPU compute needed** |
 | **Inference Token Reduction** | **$42.0\% - 47.0\%$** | Exhaustive Decode | Prunes defective trajectories before completion |
 
+> Reproducibility note: the premature-conclusion, circular-loop and semantic-only figures come from controlled structural error injection on 39 correct traces (see `CANONICAL_RESULTS_INJECTION.json`), not from naturally occurring hallucinations. Some cross-architecture `data/v2/*.json` files contain templated traces, and `colab_scripts/cross_architecture_transfer.py` falls back to `_simulate_transfer_data()` when source files are absent. Treat transfer numbers as provisional until regenerated from real model outputs.
+
 ### 🌐 Zero-Shot Cross-Architecture Transfer
 Trained *exclusively* on positive traces from Qwen2.5-0.5B, the learned structural grammar transfers zero-shot to diverse open-weight model families without retraining:
 - **Llama-3.2-1B-Instruct:** **0.985 ROC-AUC** ($r = 0.946, p < 0.001$)
@@ -52,7 +54,7 @@ pip install git+https://github.com/GauravPatil2515/Chain-Of-Taughts-HMM.git
 ```
 
 ```python
-from cot_hmm import segment_and_clean, tag_steps, EnsembleScorer, EnsembleHMMTrainer
+from cot_hmm import segment_and_clean, tag_steps, EnsembleScorer
 
 # 1. Provide an LLM reasoning trace
 reasoning_trace = """
@@ -67,11 +69,29 @@ Therefore, the total answer is 20.
 steps = segment_and_clean(reasoning_trace)
 tags = tag_steps(steps)
 print("Extracted Tags:", tags)
-# Output: ['PR', 'EQ', 'CA', 'VE', 'CO']
+# Output: ['PR', 'IN', 'CA', 'CO']
 
 # 3. Score using the Ensemble HMM
 # Returns length-normalized log-likelihood (Higher = More Plausible)
+scorer = EnsembleScorer.load("models/production_ensemble/ensemble_scorer.pkl")
+score = scorer.score(tags)
+print("Plausibility score:", round(score, 4))
 ```
+
+The trained artifact is in `models/production_ensemble/` in this repository. Without
+it, train an ensemble from tagged correct traces with `EnsembleHMMTrainer`.
+
+### Local verification
+
+```bash
+python -m pip install -e ".[dev,mcp]"
+python -m pytest -q                      # 35 tests
+python -m compileall -q src cot_hmm tests scripts colab_scripts
+python -m pip wheel . --no-deps -w dist
+python scripts/verify_install.py
+```
+
+CI runs the same checks plus a clean-venv install of the built wheel on every push.
 
 ---
 
