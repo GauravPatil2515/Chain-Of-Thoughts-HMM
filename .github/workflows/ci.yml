@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,mcp]"
+
+      - name: Compile all Python sources
+        run: python -m compileall -q src cot_hmm tests scripts colab_scripts colab_real_generation.ipynb.py
+
+      - name: Run test suite
+        run: python -m pytest -q
+
+      - name: Build wheel and verify clean install
+        run: |
+          python -m pip wheel . --no-deps -w dist
+          python -m venv .verify-venv
+          .verify-venv/bin/pip install dist/cot_hmm-*.whl
+          cd /tmp
+          "$GITHUB_WORKSPACE/.verify-venv/bin/python" "$GITHUB_WORKSPACE/scripts/verify_install.py"
