@@ -28,6 +28,9 @@ dependencies = [
     "scikit-learn>=1.0.0",
 ]
 
+[project.optional-dependencies]
+mcp = ["mcp>=2,<3"]
+
 [tool.setuptools]
 # cot_hmm re-exports from src; both packages must ship for `pip install` to work.
 packages = {find = {include = ["cot_hmm*", "src*"]}}
